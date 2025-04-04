@@ -1,0 +1,14 @@
+{
+  "name": "stadium-finder",
+  "version": "1.0.0",
+  "description": "A web-based interactive game to find stadiums in the UK",
+  "scripts": {
+    "prebuild": "node build-env.js",
+    "build": "echo 'Build completed with environment variables'"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 

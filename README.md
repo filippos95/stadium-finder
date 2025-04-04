@@ -75,6 +75,25 @@ FIREBASE_APP_ID=your_app_id
 
 > **Important**: Never commit your `.env` file to version control. It's already in the `.gitignore` file to prevent accidental exposure of secrets.
 
+## 🚀 Deployment
+
+### Deploying to Vercel
+
+1. Push your code to a GitHub repository
+2. Connect the repository to Vercel
+3. Add the following environment variables in the Vercel dashboard (Settings > Environment Variables):
+   ```
+   FIREBASE_API_KEY=your_actual_api_key
+   FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+   FIREBASE_DATABASE_URL=https://your-project-id-default-rtdb.firebaseio.com
+   FIREBASE_PROJECT_ID=your-project-id
+   FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+   FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
+   FIREBASE_APP_ID=your_app_id
+   FIREBASE_MEASUREMENT_ID=your_measurement_id
+   ```
+4. Deploy! Vercel will automatically build the project and generate the necessary `env-config.js` file.
+
 ## 📝 License
 
 MIT License - feel free to use and modify for your own projects.
