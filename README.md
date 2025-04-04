@@ -74,4 +74,4 @@ Contributions, issues, and feature requests are welcome! Feel free to check [iss
 
 ---
 
-Created with ❤️ by [Your Name] 
+Created with ❤️ by Filippos
