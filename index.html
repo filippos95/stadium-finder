@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stadium Finder Game</title>
+
+    <!-- Mapbox GL JS CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <h1 class="game-title">Stadium Finder</h1>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p>Loading game assets...</p>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content leaderboard-content">
+            <span class="close-modal" id="close-leaderboard">&times;</span>
+            <div class="leaderboard-header">
+                <div class="trophy-icon">🏆</div>
+                <h2>Stadium Finder Champions</h2>
+            </div>
+            <p class="leaderboard-subtitle">Test your stadium finding skills and join the ranks of the top explorers!</p>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                        <th>Stadiums</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-entries">
+                    <!-- Leaderboard entries will be added here by JavaScript -->
+                </tbody>
+            </table>
+            <div class="leaderboard-buttons">
+                <button id="start-from-leaderboard">Start Game</button>
+                <button id="clear-leaderboard">Clear Scores</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- This div will hold the Mapbox map -->
+    <div id='map'></div>
+    
+    <!-- Mini-map container -->
+    <div id="mini-map"></div>
+    
+    <!-- Compass -->
+    <div id="compass">
+        <div class="compass-inner">
+            <div class="compass-arrow"></div>
+            <div class="compass-n">N</div>
+            <div class="compass-e">E</div>
+            <div class="compass-s">S</div>
+            <div class="compass-w">W</div>
+        </div>
+    </div>
+    
+    <!-- Game UI -->
+    <div id="game-ui">
+        <div class="game-logo">Stadium Finder</div>
+        <div id="score-container">
+            <div>Score: <span id="score">0</span></div>
+            <div>Time: <span id="timer">60</span>s</div>
+            <div>Target: <span id="target-stadium">Find nearest stadium</span></div>
+        </div>
+        <div id="game-controls">
+            <button id="start-game-btn">Start Game</button>
+            <button id="help-btn">Help</button>
+            <button id="toggle-exploration">First Person Mode</button>
+            <button id="leaderboard-btn">Leaderboard</button>
+            <button id="multiplayer-btn">Multiplayer</button>
+        </div>
+    </div>
+    
+    <!-- Target direction indicator -->
+    <div id="target-arrow"></div>
+    
+    <!-- Game instructions modal -->
+    <div id="instructions-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Stadium Finder Game</h2>
+            <p>You are dropped at a random location in the UK. Your goal is to find Premier League stadiums as quickly as possible.</p>
+            
+            <h3>Game Modes</h3>
+            <p><strong>Exploration Mode (Default):</strong> A faster way to navigate! Simply <em>click anywhere on the map</em> to instantly move to that location. Your goal is to find the <em>specific target stadium</em> shown at the top of the screen. There are no visual markers on the map!</p>
+            <p><strong>First Person Mode:</strong> Navigate in a first-person view with WASD/arrow keys and directional assistance pointing to the target stadium.</p>
+            <p>Toggle between modes using the button or by pressing the 'E' key.</p>
+            
+            <h3>Controls:</h3>
+            <ul>
+                <li><strong>Exploration Mode:</strong> Mouse click to instantly move to any location, zoom controls to adjust view</li>
+                <li><strong>First Person Mode:</strong> W, A, S, D or Arrow keys to move, mouse to look around</li>
+                <li><strong>Space:</strong> Identify stadium (when close to the target)</li>
+                <li><strong>E key:</strong> Toggle between exploration and first-person mode</li>
+            </ul>
+            <p>In Exploration Mode, the mini-map shows only your location. You'll need to use real-world knowledge to find stadiums!</p>
+            <p>When you get close to the target stadium (within 500m), press SPACE to identify it and earn points.</p>
+            <p>Each found stadium gives you extra time and a new target is assigned. Find as many as possible before time runs out!</p>
+        </div>
+    </div>
+
+    <!-- Info Panel (Initially Hidden) -->
+    <div id="info-panel">
+        <button id="close-panel-btn">&times;</button>
+        <h2 id="panel-stadium-name">Stadium Name</h2>
+        <img id="panel-stadium-image" src="" alt="Stadium Image" style="width: 100%; height: auto; margin-bottom: 15px;">
+        <p id="panel-stadium-description">Description goes here.</p>
+        <p><strong>Year Built:</strong> <span id="panel-stadium-year">N/A</span></p>
+        <p><strong>Capacity:</strong> <span id="panel-stadium-capacity">N/A</span></p>
+        <p><strong>Record Attendance:</strong> <span id="panel-stadium-attendance">N/A</span></p>
+        <p><strong>Surface:</strong> <span id="panel-stadium-surface">N/A</span></p>
+        <p><strong>Architect:</strong> <span id="panel-stadium-architect">N/A</span></p>
+        <p><strong>Cost:</strong> <span id="panel-stadium-cost">N/A</span></p>
+        <p><strong>Home Teams:</strong></p>
+        <ul id="panel-stadium-teams">
+            <li>Team 1</li>
+        </ul>
+    </div>
+
+    <!-- Game over modal -->
+    <div id="game-over-modal" class="modal">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>Your final score: <span id="final-score">0</span></p>
+            <p>Stadiums found: <span id="stadiums-found">0</span></p>
+            <button id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Multiplayer Lobby Modal -->
+    <div id="multiplayer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-multiplayer">&times;</span>
+            <div class="multiplayer-header">
+                <div class="versus-icon">⚔️</div>
+                <h2>Multiplayer Mode</h2>
+            </div>
+            
+            <div id="multiplayer-login" class="multiplayer-section">
+                <h3>Enter Your Nickname</h3>
+                <input type="text" id="player-nickname" placeholder="Your nickname" maxlength="15">
+                <button id="set-nickname-btn">Continue</button>
+            </div>
+            
+            <div id="multiplayer-menu" class="multiplayer-section" style="display: none;">
+                <div class="multiplayer-options">
+                    <button id="create-game-btn" class="multiplayer-btn">Create New Game</button>
+                    <button id="join-game-btn" class="multiplayer-btn">Join Game</button>
+                    <button id="return-solo-btn">Return to Solo Mode</button>
+                </div>
+            </div>
+            
+            <div id="waiting-room" class="multiplayer-section" style="display: none;">
+                <h3>Game Code: <span id="game-code">XXXX</span></h3>
+                <p>Share this code with your friend to join your game</p>
+                <div class="room-status">
+                    <div class="player-status">
+                        <div id="host-indicator" class="player-indicator">👑</div>
+                        <span id="host-name">You</span>
+                        <div class="status-badge ready">Ready</div>
+                    </div>
+                    <div class="versus-small">VS</div>
+                    <div class="player-status">
+                        <div id="guest-indicator" class="player-indicator">🎮</div>
+                        <span id="guest-name">Waiting...</span>
+                        <div id="guest-status" class="status-badge waiting">Waiting</div>
+                    </div>
+                </div>
+                <button id="start-multiplayer-btn" disabled>Start Game</button>
+                <button id="leave-room-btn">Leave Room</button>
+            </div>
+            
+            <div id="join-game-section" class="multiplayer-section" style="display: none;">
+                <h3>Enter Game Code</h3>
+                <div class="code-entry">
+                    <input type="text" id="join-code" placeholder="XXXX" maxlength="4">
+                    <button id="join-room-btn">Join Game</button>
+                </div>
+                <p id="join-error" class="error-message"></p>
+                <button id="back-to-menu-btn">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Game Opponent Status -->
+    <div id="opponent-status" class="hidden">
+        <div class="opponent-info">
+            <span id="opponent-name">Opponent</span>
+            <span id="opponent-score">0</span>
+        </div>
+        <div class="opponent-stadiums">
+            <span id="opponent-stadiums-count">0</span> stadiums
+        </div>
+    </div>
+
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+
+    <!-- Three.js Library (using a CDN) -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'></script>
+    <!-- Optional: Add GLTFLoader if you plan to load GLTF models later -->
+    <!-- <script src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'></script> -->
+
+    <!-- Firebase Libraries for Multiplayer -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Our Custom JavaScript -->
+    <script src="script.js"></script>
+
+</body>
+</html>

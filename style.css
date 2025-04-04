@@ -1,0 +1,821 @@
+body {
+    margin: 0; /* Remove default body margin */
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbars */
+    font-family: sans-serif; /* Basic font */
+    background-color: #000; /* Black background */
+}
+
+html, body {
+    height: 100%; /* Make html and body take full height */
+}
+
+#map {
+    position: absolute; /* Position it absolutely */
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%; /* Make map container fill the body */
+}
+
+/* Celebration effect */
+.celebration-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    perspective: 1000px;
+}
+
+.celebration-particle {
+    position: absolute;
+    top: 50%;
+    border-radius: 50%;
+    animation: particle-animation 3s ease-out forwards;
+}
+
+@keyframes particle-animation {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-100vh) scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Fancy title effect for stadium name */
+#target-stadium {
+    background: linear-gradient(90deg, #ff4500, #ffa500, #ff6347);
+    background-size: 200% auto;
+    color: #fff;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 2s linear infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Mini-map styling - enhanced */
+#mini-map {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 250px;
+    height: 250px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(52, 152, 219, 0.3);
+    overflow: hidden;
+    z-index: 10;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Game UI Styling */
+#game-ui {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#score-container {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#game-controls {
+    display: flex;
+    gap: 10px;
+}
+
+#game-controls button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #2c3e50;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#game-controls button:hover {
+    background-color: #34495e;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+    transform: translateY(-2px);
+}
+
+#start-game-btn {
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+}
+
+#start-game-btn:hover {
+    background: linear-gradient(to right, #2ecc71, #27ae60);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+/* Modal styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 20;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 8px;
+    width: 60%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.close-modal {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #555;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+#play-again-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#play-again-btn:hover {
+    background-color: #2ecc71;
+}
+
+/* Target indicator */
+#target-indicator {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    z-index: 5;
+    pointer-events: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/><line x1="50" y1="25" x2="50" y2="75" stroke="rgba(255,255,255,0.7)" stroke-width="2"/><line x1="25" y1="50" x2="75" y2="50" stroke="rgba(255,255,255,0.7)" stroke-width="2"/></svg>');
+    background-size: contain;
+    opacity: 0.8;
+}
+
+/* Custom Info Marker Style */
+.info-marker {
+    background-color: rgba(0, 123, 255, 0.9); /* Blue background */
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.info-marker:hover {
+    background-color: rgba(0, 86, 179, 0.95);
+}
+
+/* Mini-map marker style */
+.mini-map-marker {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: red;
+    border: 1px solid white;
+}
+
+.mini-map-player {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: blue;
+    border: 1px solid white;
+}
+
+/* Info Panel Styling */
+#info-panel {
+    position: absolute;
+    top: 0;
+    right: -350px; /* Start off-screen */
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    transition: right 0.4s ease-in-out; /* Animation */
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#info-panel.visible {
+    right: 0; /* Slide into view */
+}
+
+#info-panel h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+#info-panel p {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+#info-panel p strong {
+    color: #333;
+}
+
+#info-panel ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 5px;
+}
+
+#info-panel li {
+    margin-bottom: 5px;
+    color: #555;
+}
+
+#info-panel img {
+    border-radius: 4px;
+}
+
+#close-panel-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#close-panel-btn:hover {
+    color: #333;
+}
+
+/* Distance indicator */
+#distance-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    text-align: center;
+    z-index: 10;
+}
+
+/* Target arrow indicator */
+#target-arrow {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    z-index: 5;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>');
+    background-size: contain;
+    opacity: 0.8;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #141e30;
+    background-image: linear-gradient(to bottom, #243b55, #141e30);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease-in-out;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.game-title {
+    font-size: 48px;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    font-weight: 800;
+}
+
+.loading-bar {
+    width: 300px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.loading-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Compass */
+#compass {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 100px;
+    height: 100px;
+    z-index: 10;
+}
+
+.compass-inner {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.compass-arrow {
+    position: absolute;
+    width: 4px;
+    height: 50px;
+    background: linear-gradient(to bottom, red 0%, red 50%, white 50%, white 100%);
+    transform-origin: center bottom;
+}
+
+.compass-n, .compass-e, .compass-s, .compass-w {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.compass-n {
+    top: 10px;
+}
+
+.compass-e {
+    right: 10px;
+}
+
+.compass-s {
+    bottom: 10px;
+}
+
+.compass-w {
+    left: 10px;
+}
+
+/* Game Logo */
+.game-logo {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(90deg, #ff4500, #ffa500, #ff6347);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 3s linear infinite;
+}
+
+/* Stadium markers on main map */
+.stadium-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(255, 0, 0, 0.7);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.stadium-marker:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 0, 0, 1);
+    transform: scale(1.2);
+}
+
+/* Leaderboard Styles */
+.leaderboard-content {
+    max-width: 800px;
+    width: 80%;
+}
+
+.leaderboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.trophy-icon {
+    font-size: 40px;
+    margin-right: 15px;
+    animation: trophy-shine 2s infinite alternate;
+}
+
+@keyframes trophy-shine {
+    from { text-shadow: 0 0 5px gold, 0 0 10px gold; }
+    to { text-shadow: 0 0 15px gold, 0 0 20px gold; }
+}
+
+.leaderboard-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+#leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#leaderboard-table th,
+#leaderboard-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+#leaderboard-table thead {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+}
+
+#leaderboard-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#leaderboard-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+#leaderboard-table tbody tr:nth-child(1) {
+    background-color: rgba(255, 215, 0, 0.2); /* Gold for first place */
+}
+
+#leaderboard-table tbody tr:nth-child(2) {
+    background-color: rgba(192, 192, 192, 0.2); /* Silver for second place */
+}
+
+#leaderboard-table tbody tr:nth-child(3) {
+    background-color: rgba(205, 127, 50, 0.2); /* Bronze for third place */
+}
+
+.leaderboard-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.leaderboard-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#start-from-leaderboard {
+    background-color: #27ae60;
+    color: white;
+}
+
+#start-from-leaderboard:hover {
+    background-color: #2ecc71;
+}
+
+#clear-leaderboard {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#clear-leaderboard:hover {
+    background-color: #c0392b;
+}
+
+/* Multiplayer Styles */
+.multiplayer-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.versus-icon {
+    font-size: 36px;
+    margin-right: 15px;
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+.multiplayer-section {
+    margin-bottom: 20px;
+}
+
+#player-nickname {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #3498db;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#set-nickname-btn, 
+.multiplayer-btn, 
+#start-multiplayer-btn, 
+#leave-room-btn,
+#join-room-btn,
+#back-to-menu-btn,
+#return-solo-btn {
+    padding: 10px 15px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.multiplayer-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 16px;
+}
+
+#create-game-btn {
+    background-color: #27ae60;
+}
+
+#join-game-btn {
+    background-color: #3498db;
+}
+
+#return-solo-btn {
+    background-color: #7f8c8d;
+}
+
+#start-multiplayer-btn {
+    background-color: #27ae60;
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+#start-multiplayer-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+#leave-room-btn {
+    background-color: #e74c3c;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.room-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+.player-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #ecf0f1;
+    width: 40%;
+}
+
+.player-indicator {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.versus-small {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.status-badge {
+    margin-top: 5px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-badge.ready {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status-badge.waiting {
+    background-color: #e67e22;
+    color: white;
+}
+
+#game-code {
+    font-weight: bold;
+    font-size: 24px;
+    letter-spacing: 5px;
+    color: #3498db;
+}
+
+.code-entry {
+    display: flex;
+    margin: 15px 0;
+}
+
+#join-code {
+    flex: 1;
+    padding: 10px;
+    font-size: 18px;
+    border: 2px solid #3498db;
+    border-radius: 5px 0 0 5px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-align: center;
+}
+
+#join-room-btn {
+    border-radius: 0 5px 5px 0;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Opponent Status Display */
+#opponent-status {
+    position: absolute;
+    top: 20px;
+    right: 290px; /* Position to the left of the mini-map */
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+#opponent-status.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.opponent-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+#opponent-name {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#opponent-score {
+    font-size: 18px;
+    color: #f39c12;
+}
+
+.opponent-stadiums {
+    font-size: 12px;
+    text-align: right;
+}
+
+/* Add a "multiplayer" button to the game controls */
+#multiplayer-btn {
+    background: linear-gradient(to right, #3498db, #2980b9);
+}
+
+#multiplayer-btn:hover {
+    background: linear-gradient(to right, #2980b9, #3498db);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+}
