@@ -62,7 +62,18 @@ git clone https://github.com/your-username/stadium-finder.git
 python -m http.server 8000
 ```
 
-3. For multiplayer functionality, update the Firebase configuration in `script.js`
+3. For multiplayer functionality, create a `.env` file in the project root with your Firebase configuration:
+```
+FIREBASE_API_KEY=your_actual_api_key
+FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+FIREBASE_DATABASE_URL=https://your-project-id-default-rtdb.firebaseio.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
+FIREBASE_APP_ID=your_app_id
+```
+
+> **Important**: Never commit your `.env` file to version control. It's already in the `.gitignore` file to prevent accidental exposure of secrets.
 
 ## 📝 License
 

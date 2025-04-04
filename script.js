@@ -340,16 +340,16 @@ let firebaseDB = null;
 
 // Function to initialize Firebase (call this when deploying to production)
 function initializeFirebase() {
-    // This would normally be replaced with your actual Firebase configuration
+    // Load Firebase configuration from environment variables if available
+    // Otherwise, use placeholder configuration
     const firebaseConfig = {
-        apiKey: "AIzaSyCZkUt9toXI1axWeXgiFgdwNGbEW9F4Jww",
-        authDomain: "stadium-finder-b23b8.firebaseapp.com",
-        databaseURL: "https://stadium-finder-b23b8-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "stadium-finder-b23b8",
-        storageBucket: "stadium-finder-b23b8.firebasestorage.app",
-        messagingSenderId: "755811478109",
-        appId: "1:755811478109:web:77e9da7f53c3e0990fbbb4",
-        measurementId: "G-R72R6BEQE4"
+        apiKey: window.env?.FIREBASE_API_KEY || "YOUR_API_KEY",
+        authDomain: window.env?.FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
+        databaseURL: window.env?.FIREBASE_DATABASE_URL || "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+        projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
+        storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
+        messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
+        appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
     };
 
     // For development, we'll use mock Firebase functionality
