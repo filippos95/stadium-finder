@@ -417,7 +417,8 @@ function setupMockFirebase() {
                     console.log(`Mock Firebase remove ${path}`);
                     return Promise.resolve();
                 },
-                onValue: (callback) => {
+                on: (eventType, callback) => {
+                    console.log(`Mock Firebase on ${eventType} for ${path}`);
                     // Mock data for testing
                     if (path.includes('rooms') && !path.includes('players')) {
                         callback({
@@ -463,8 +464,14 @@ function setupMockFirebase() {
                             }
                         });
                     }
+                    
+                    // Return an object with off method to match Firebase API
+                    return {
+                        off: () => console.log(`Mock Firebase off for ${path}`)
+                    };
                 },
                 once: (eventType) => {
+                    console.log(`Mock Firebase once ${eventType} for ${path}`);
                     return new Promise((resolve) => {
                         if (path === 'leaderboard') {
                             // Return mock leaderboard data from localStorage
@@ -480,6 +487,17 @@ function setupMockFirebase() {
                                     });
                                 }
                             });
+                        } else if (path.includes('rooms/')) {
+                            // Mock room data for testing join functionality
+                            resolve({
+                                exists: () => true,
+                                val: () => ({
+                                    hostName: "Test Host",
+                                    active: true,
+                                    gameStarted: false,
+                                    created: new Date().toISOString()
+                                })
+                            });
                         } else {
                             resolve({
                                 exists: () => false,
@@ -489,7 +507,7 @@ function setupMockFirebase() {
                         }
                     });
                 },
-                off: (eventType) => console.log(`Mock Firebase off ${path} ${eventType}`)
+                off: (eventType) => console.log(`Mock Firebase off ${path} ${eventType || 'all'}`)
             };
         }
     };
@@ -1627,7 +1645,8 @@ function createGameRoom() {
 function listenForPlayerJoins() {
     if (firebaseDB) {
         const guestRef = firebaseDB.ref(`rooms/${gameRoomId}/players/guest`);
-        guestRef.onValue((snapshot) => {
+        // Fix: Use correct Firebase method
+        guestRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const guestData = snapshot.val();
                 
@@ -1661,49 +1680,60 @@ function joinGameRoom() {
         return;
     }
     
+    console.log("Attempting to join room:", code);
+    joinErrorDisplay.textContent = 'Connecting...';
+    
     // Check if room exists
     if (firebaseDB) {
         const roomRef = firebaseDB.ref(`rooms/${code}`);
-        roomRef.onValue((snapshot) => {
-            // Only run this once
-            roomRef.off('value');
-            
-            if (snapshot.exists() && snapshot.val().active && !snapshot.val().gameStarted) {
-                // Room exists and game hasn't started
-                gameRoomId = code;
-                isHost = false;
-                isMultiplayerMode = true;
-                
-                // Join the room
-                const hostName = snapshot.val().hostName;
-                opponentName = hostName;
-                
-                // Update UI
-                gameCodeDisplay.textContent = gameRoomId;
-                hostNameDisplay.textContent = hostName;
-                guestNameDisplay.textContent = playerNickname;
-                
-                // Add player to the room
-                const guestRef = firebaseDB.ref(`rooms/${gameRoomId}/players/guest`);
-                guestRef.set({
-                    name: playerNickname,
-                    score: 0,
-                    stadiumsFound: 0
-                });
-                
+        
+        // Fix: Use correct Firebase method
+        roomRef.once('value')
+            .then((snapshot) => {
+                if (snapshot.exists() && snapshot.val().active && !snapshot.val().gameStarted) {
+                    // Room exists and game hasn't started
+                    console.log("Room found, joining game:", code);
+                    gameRoomId = code;
+                    isHost = false;
+                    isMultiplayerMode = true;
+                    
+                    // Join the room
+                    const hostName = snapshot.val().hostName;
+                    opponentName = hostName;
+                    
+                    // Update UI
+                    gameCodeDisplay.textContent = gameRoomId;
+                    hostNameDisplay.textContent = hostName;
+                    guestNameDisplay.textContent = playerNickname;
+                    
+                    // Add player to the room
+                    const guestRef = firebaseDB.ref(`rooms/${gameRoomId}/players/guest`);
+                    return guestRef.set({
+                        name: playerNickname,
+                        score: 0,
+                        stadiumsFound: 0
+                    });
+                } else {
+                    // Room doesn't exist or game already started
+                    throw new Error("Game not found or already started");
+                }
+            })
+            .then(() => {
                 // Listen for game start
                 listenForGameStart();
                 
                 // Show waiting room
                 joinGameSection.style.display = 'none';
                 waitingRoomSection.style.display = 'block';
-            } else {
-                // Room doesn't exist or game already started
-                joinErrorDisplay.textContent = 'Game not found or already started';
-            }
-        });
+                joinErrorDisplay.textContent = '';
+            })
+            .catch((error) => {
+                console.error("Error joining game:", error);
+                joinErrorDisplay.textContent = error.message;
+            });
     } else {
         // Testing mode - simulate joining
+        console.log("Firebase not available, using testing mode");
         gameRoomId = code;
         isHost = false;
         isMultiplayerMode = true;
@@ -1723,7 +1753,8 @@ function joinGameRoom() {
 function listenForGameStart() {
     if (firebaseDB) {
         const roomRef = firebaseDB.ref(`rooms/${gameRoomId}`);
-        roomRef.onValue((snapshot) => {
+        // Fix: Use correct Firebase method
+        roomRef.on('value', (snapshot) => {
             if (snapshot.exists() && snapshot.val().gameStarted) {
                 // Game has been started by the host
                 startMultiplayerGame();
@@ -1762,7 +1793,8 @@ function listenForOpponentUpdates() {
         const opponentType = isHost ? 'guest' : 'host';
         const opponentRef = firebaseDB.ref(`rooms/${gameRoomId}/players/${opponentType}`);
         
-        opponentRef.onValue((snapshot) => {
+        // Fix: Use correct Firebase method
+        opponentRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 
@@ -1951,3 +1983,94 @@ function diagnoseConnectionStatus() {
 
 // Make diagnostic function globally available (for troubleshooting)
 window.diagnoseStadiumFinder = diagnoseConnectionStatus;
+
+// Adding a debugging function for Firebase
+function testAndFixFirebase() {
+    console.log("====== TESTING FIREBASE CONNECTION ======");
+  
+    // Step 1: Test basic Firebase connectivity
+    console.log("Step 1: Testing Firebase connectivity...");
+    if (!window.firebase) {
+        console.error("❌ Firebase SDK not loaded!");
+        return "Firebase SDK not found. Check your script inclusions.";
+    }
+    
+    try {
+        // Initialize Firebase if not already initialized
+        if (!firebaseDB) {
+            console.log("Initializing Firebase for testing...");
+            initializeFirebase();
+        }
+        
+        if (!firebaseDB) {
+            console.error("❌ Firebase database not initialized!");
+            return "Firebase initialization failed. Check console for errors.";
+        }
+        
+        console.log("✅ Firebase SDK loaded and database initialized");
+        
+        // Step 2: Test write permission
+        console.log("Step 2: Testing write permission...");
+        const testRef = firebaseDB.ref(`test/connection-${Date.now()}`);
+        testRef.set({
+            timestamp: Date.now(),
+            message: "Connection test"
+        })
+        .then(() => {
+            console.log("✅ Write permission test passed");
+            
+            // Remove test data
+            testRef.remove();
+            
+            // Step 3: Test read permission for leaderboard
+            console.log("Step 3: Testing leaderboard read permission...");
+            return firebaseDB.ref('leaderboard').limitToFirst(1).once('value');
+        })
+        .then((snapshot) => {
+            console.log("✅ Read permission test passed");
+            console.log(`Leaderboard exists: ${snapshot.exists()}`);
+            
+            // Step 4: Force refresh leaderboard
+            console.log("Step 4: Forcing leaderboard refresh...");
+            loadLeaderboard();
+            console.log("✅ Leaderboard refresh triggered");
+            
+            console.log("====== ALL TESTS PASSED ======");
+            return "Firebase tests passed successfully! Leaderboard should now be working.";
+        })
+        .catch((error) => {
+            console.error("❌ Permission error:", error);
+            
+            if (error.code === "PERMISSION_DENIED") {
+                console.error("Firebase security rules may need updating!");
+                console.log("You need these rules for your leaderboard:");
+                console.log(`{
+  "rules": {
+    "leaderboard": {
+      ".read": true,
+      ".write": true
+    },
+    "rooms": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        "players": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    }
+  }
+}`);
+            }
+            
+            return `Firebase test failed: ${error.message}. Check console for details.`;
+        });
+    } catch (error) {
+        console.error("❌ Firebase test error:", error);
+        return `Firebase test error: ${error.message}`;
+    }
+}
+
+// Make test function globally available
+window.testAndFixFirebase = testAndFixFirebase;
