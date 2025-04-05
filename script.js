@@ -1234,6 +1234,11 @@ function addCelebrationEffect() {
 
 // Show loading screen
 function showLoadingScreen() {
+    // Initialize Firebase early for leaderboard
+    if (!firebaseDB) {
+        initializeFirebase();
+    }
+    
     let progress = 0;
     const loadingInterval = setInterval(() => {
         progress += Math.random() * 10;
@@ -1272,20 +1277,41 @@ function showLeaderboard() {
     leaderboardModal.style.display = 'block';
 }
 
-// Load scores from localStorage and populate the leaderboard
+// Load scores from Firebase (or localStorage as fallback) and populate the leaderboard
 function loadLeaderboard() {
-    const highScores = getHighScores();
     leaderboardEntries.innerHTML = '';
     
+    // If Firebase is available, use it for leaderboard
+    if (firebaseDB) {
+        const leaderboardRef = firebaseDB.ref('leaderboard');
+        leaderboardRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+            const highScores = [];
+            
+            // Convert Firebase data to array
+            snapshot.forEach((childSnapshot) => {
+                highScores.push(childSnapshot.val());
+            });
+            
+            // Sort by score (highest first)
+            highScores.sort((a, b) => b.score - a.score);
+            
+            displayLeaderboard(highScores);
+        });
+    } else {
+        // Fallback to localStorage if Firebase not available
+        const highScores = getLocalHighScores();
+        displayLeaderboard(highScores);
+    }
+}
+
+// Display leaderboard entries in the UI
+function displayLeaderboard(highScores) {
     if (highScores.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = '<td colspan="5" style="text-align: center;">No scores yet. Be the first to play!</td>';
         leaderboardEntries.appendChild(row);
         return;
     }
-    
-    // Sort by score (highest first)
-    highScores.sort((a, b) => b.score - a.score);
     
     // Display top 10 scores
     highScores.slice(0, 10).forEach((entry, index) => {
@@ -1303,23 +1329,32 @@ function loadLeaderboard() {
     });
 }
 
-// Get high scores from localStorage
-function getHighScores() {
+// Get high scores from localStorage (fallback method)
+function getLocalHighScores() {
     const scores = localStorage.getItem('stadiumFinderHighScores');
     return scores ? JSON.parse(scores) : [];
 }
 
-// Save score to leaderboard
+// Save score to leaderboard (Firebase + localStorage fallback)
 function saveScore(name, score, stadiumsFound) {
-    const highScores = getHighScores();
-    
-    // Add new score
-    highScores.push({
+    // Generate a unique ID for the score
+    const scoreId = Date.now().toString();
+    const scoreData = {
         name: name,
         score: score,
         stadiumsFound: stadiumsFound,
         date: new Date().toISOString()
-    });
+    };
+    
+    // Save to Firebase if available
+    if (firebaseDB) {
+        const leaderboardRef = firebaseDB.ref('leaderboard/' + scoreId);
+        leaderboardRef.set(scoreData);
+    }
+    
+    // Also save to localStorage as fallback
+    const highScores = getLocalHighScores();
+    highScores.push(scoreData);
     
     // Sort by score (highest first)
     highScores.sort((a, b) => b.score - a.score);
@@ -1334,8 +1369,17 @@ function saveScore(name, score, stadiumsFound) {
 // Clear all high scores
 function clearLeaderboard() {
     if (confirm('Are you sure you want to clear all high scores? This cannot be undone.')) {
+        // Clear Firebase leaderboard if available
+        if (firebaseDB) {
+            const leaderboardRef = firebaseDB.ref('leaderboard');
+            leaderboardRef.remove();
+        }
+        
+        // Also clear localStorage
         localStorage.removeItem('stadiumFinderHighScores');
-        loadLeaderboard(); // Refresh display
+        
+        // Refresh display
+        loadLeaderboard();
     }
 }
 
