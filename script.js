@@ -340,66 +340,159 @@ let firebaseDB = null;
 
 // Function to initialize Firebase (call this when deploying to production)
 function initializeFirebase() {
-    // Load Firebase configuration from environment variables if available
-    // Otherwise, use placeholder configuration
-    const firebaseConfig = {
-        apiKey: window.env?.FIREBASE_API_KEY || "YOUR_API_KEY",
-        authDomain: window.env?.FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
-        databaseURL: window.env?.FIREBASE_DATABASE_URL || "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-        projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
-        storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
-        messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
-        appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
-    };
+    console.log("Initializing Firebase...");
+    
+    try {
+        // Load Firebase configuration from environment variables if available
+        // Otherwise, use placeholder configuration
+        const firebaseConfig = {
+            apiKey: window.env?.FIREBASE_API_KEY || "YOUR_API_KEY",
+            authDomain: window.env?.FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: window.env?.FIREBASE_DATABASE_URL || "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
+            storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
+            messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
+            appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
+        };
+        
+        console.log("Firebase config:", JSON.stringify({
+            apiKey: firebaseConfig.apiKey ? "***" : "NOT SET",
+            authDomain: firebaseConfig.authDomain,
+            databaseURL: firebaseConfig.databaseURL,
+            projectId: firebaseConfig.projectId
+        }));
+        
+        // Validate essential Firebase config
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY" || 
+            !firebaseConfig.databaseURL || firebaseConfig.databaseURL === "https://YOUR_PROJECT-default-rtdb.firebaseio.com") {
+            console.warn("Firebase configuration is incomplete. Using mock Firebase.");
+            setupMockFirebase();
+            return;
+        }
 
-    // For development, we'll use mock Firebase functionality
-    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
-        firebaseApp = firebase.initializeApp(firebaseConfig);
-        firebaseDB = firebase.database();
-        console.log("Firebase initialized");
-    } else {
-        console.log("Using mock Firebase for development");
-        // Create mock Firebase functionality for development
-        firebaseDB = {
-            ref: (path) => {
-                return {
-                    set: (data) => console.log(`Firebase set ${path}:`, data),
-                    update: (data) => console.log(`Firebase update ${path}:`, data),
-                    remove: () => console.log(`Firebase remove ${path}`),
-                    onValue: (callback) => {
-                        // Mock data for testing
-                        if (path.includes('rooms') && !path.includes('players')) {
-                            callback({
-                                exists: () => true,
-                                val: () => ({
-                                    hostName: isHost ? playerNickname : "Test Opponent",
-                                    active: true,
-                                    created: new Date().toISOString()
-                                })
+        // Initialize Firebase only if it's not already initialized
+        if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDB = firebase.database();
+            console.log("Firebase successfully initialized");
+            
+            // Test connection by reading a value
+            firebaseDB.ref('.info/connected').on('value', (snap) => {
+                if (snap.val() === true) {
+                    console.log("Connected to Firebase");
+                } else {
+                    console.warn("Disconnected from Firebase");
+                }
+            });
+        } else if (firebase.apps.length > 0) {
+            console.log("Firebase already initialized");
+            firebaseApp = firebase.app();
+            firebaseDB = firebase.database();
+        } else {
+            console.warn("Firebase SDK not found, using mock Firebase");
+            setupMockFirebase();
+        }
+    } catch (error) {
+        console.error("Error initializing Firebase:", error);
+        setupMockFirebase();
+    }
+}
+
+// Setup mock Firebase functionality for development or when real Firebase isn't available
+function setupMockFirebase() {
+    console.log("Setting up mock Firebase...");
+    // Create mock Firebase functionality
+    firebaseDB = {
+        ref: (path) => {
+            return {
+                set: (data) => {
+                    console.log(`Mock Firebase set ${path}:`, data);
+                    return Promise.resolve();
+                },
+                update: (data) => {
+                    console.log(`Mock Firebase update ${path}:`, data);
+                    return Promise.resolve();
+                },
+                remove: () => {
+                    console.log(`Mock Firebase remove ${path}`);
+                    return Promise.resolve();
+                },
+                onValue: (callback) => {
+                    // Mock data for testing
+                    if (path.includes('rooms') && !path.includes('players')) {
+                        callback({
+                            exists: () => true,
+                            val: () => ({
+                                hostName: isHost ? playerNickname : "Test Opponent",
+                                active: true,
+                                created: new Date().toISOString()
+                            })
+                        });
+                    } else if (path.includes('players')) {
+                        callback({
+                            exists: () => true,
+                            val: () => ({
+                                [isHost ? 'host' : 'guest']: {
+                                    name: playerNickname,
+                                    score: score,
+                                    stadiumsFound: foundStadiums.length
+                                },
+                                [isHost ? 'guest' : 'host']: {
+                                    name: "Test Opponent",
+                                    score: Math.floor(Math.random() * 200),
+                                    stadiumsFound: Math.floor(Math.random() * 5)
+                                }
+                            })
+                        });
+                    } else if (path === '.info/connected') {
+                        callback({
+                            val: () => true
+                        });
+                    } else if (path === 'leaderboard') {
+                        // Return mock leaderboard data from localStorage
+                        const localScores = getLocalHighScores();
+                        callback({
+                            exists: () => localScores.length > 0,
+                            forEach: (fn) => {
+                                localScores.forEach((score, index) => {
+                                    fn({
+                                        val: () => score,
+                                        key: `mock-key-${index}`
+                                    });
+                                });
+                            }
+                        });
+                    }
+                },
+                once: (eventType) => {
+                    return new Promise((resolve) => {
+                        if (path === 'leaderboard') {
+                            // Return mock leaderboard data from localStorage
+                            const localScores = getLocalHighScores();
+                            resolve({
+                                exists: () => localScores.length > 0,
+                                forEach: (fn) => {
+                                    localScores.forEach((score, index) => {
+                                        fn({
+                                            val: () => score,
+                                            key: `mock-key-${index}`
+                                        });
+                                    });
+                                }
                             });
-                        } else if (path.includes('players')) {
-                            callback({
-                                exists: () => true,
-                                val: () => ({
-                                    [isHost ? 'host' : 'guest']: {
-                                        name: playerNickname,
-                                        score: score,
-                                        stadiumsFound: foundStadiums.length
-                                    },
-                                    [isHost ? 'guest' : 'host']: {
-                                        name: "Test Opponent",
-                                        score: Math.floor(Math.random() * 200),
-                                        stadiumsFound: Math.floor(Math.random() * 5)
-                                    }
-                                })
+                        } else {
+                            resolve({
+                                exists: () => false,
+                                val: () => null,
+                                forEach: () => {}
                             });
                         }
-                    },
-                    off: (eventType) => console.log(`Firebase off ${path} ${eventType}`)
-                };
-            }
-        };
-    }
+                    });
+                },
+                off: (eventType) => console.log(`Mock Firebase off ${path} ${eventType}`)
+            };
+        }
+    };
 }
 
 // DOM elements
@@ -1260,6 +1353,11 @@ function showLoadingScreen() {
     }, 200);
 }
 
+// Initialize Firebase as early as possible
+console.log("Stadium Finder starting up...");
+initializeFirebase();
+console.log("Firebase status: " + (firebaseDB ? "Initialized" : "Not initialized"));
+
 // Call this immediately to show loading screen
 showLoadingScreen();
 
@@ -1283,21 +1381,34 @@ function loadLeaderboard() {
     
     // If Firebase is available, use it for leaderboard
     if (firebaseDB) {
+        console.log("Loading leaderboard from Firebase...");
         const leaderboardRef = firebaseDB.ref('leaderboard');
-        leaderboardRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-            const highScores = [];
-            
-            // Convert Firebase data to array
-            snapshot.forEach((childSnapshot) => {
-                highScores.push(childSnapshot.val());
+        
+        // Get all scores and sort them in memory (most reliable approach)
+        leaderboardRef.once('value')
+            .then((snapshot) => {
+                const highScores = [];
+                
+                // Convert Firebase data to array
+                snapshot.forEach((childSnapshot) => {
+                    highScores.push(childSnapshot.val());
+                });
+                
+                console.log(`Loaded ${highScores.length} scores from Firebase`);
+                
+                // Sort by score (highest first)
+                highScores.sort((a, b) => b.score - a.score);
+                
+                displayLeaderboard(highScores);
+            })
+            .catch((error) => {
+                console.error("Error loading Firebase leaderboard:", error);
+                // Fallback to localStorage if Firebase fails
+                const highScores = getLocalHighScores();
+                displayLeaderboard(highScores);
             });
-            
-            // Sort by score (highest first)
-            highScores.sort((a, b) => b.score - a.score);
-            
-            displayLeaderboard(highScores);
-        });
     } else {
+        console.log("Firebase not available, using localStorage");
         // Fallback to localStorage if Firebase not available
         const highScores = getLocalHighScores();
         displayLeaderboard(highScores);
@@ -1337,6 +1448,8 @@ function getLocalHighScores() {
 
 // Save score to leaderboard (Firebase + localStorage fallback)
 function saveScore(name, score, stadiumsFound) {
+    console.log(`Saving score for ${name}: ${score} points, ${stadiumsFound} stadiums`);
+    
     // Generate a unique ID for the score
     const scoreId = Date.now().toString();
     const scoreData = {
@@ -1348,8 +1461,17 @@ function saveScore(name, score, stadiumsFound) {
     
     // Save to Firebase if available
     if (firebaseDB) {
+        console.log("Saving score to Firebase");
         const leaderboardRef = firebaseDB.ref('leaderboard/' + scoreId);
-        leaderboardRef.set(scoreData);
+        leaderboardRef.set(scoreData)
+            .then(() => {
+                console.log("Score saved successfully to Firebase");
+            })
+            .catch((error) => {
+                console.error("Error saving score to Firebase:", error);
+            });
+    } else {
+        console.log("Firebase not available, saving to localStorage only");
     }
     
     // Also save to localStorage as fallback
@@ -1364,6 +1486,7 @@ function saveScore(name, score, stadiumsFound) {
     
     // Save back to localStorage
     localStorage.setItem('stadiumFinderHighScores', JSON.stringify(topScores));
+    console.log("Score saved to localStorage");
 }
 
 // Clear all high scores
@@ -1775,3 +1898,56 @@ endGame = function(victory) {
     // Call the original endGame function
     originalEndGame(victory);
 };
+
+// Function to diagnose connection issues
+function diagnoseConnectionStatus() {
+    console.log("=== STADIUM FINDER DIAGNOSTICS ===");
+    console.log("Firebase DB initialized:", !!firebaseDB);
+    
+    // Check environment variables
+    console.log("Environment vars available:", !!window.env);
+    if (window.env) {
+        console.log("API Key configured:", !!window.env.FIREBASE_API_KEY);
+        console.log("Database URL configured:", !!window.env.FIREBASE_DATABASE_URL);
+    }
+    
+    // Test localStorage
+    const testKey = "diagnostics_test";
+    try {
+        localStorage.setItem(testKey, "test value");
+        console.log("localStorage write: SUCCESS");
+        const value = localStorage.getItem(testKey);
+        console.log("localStorage read:", value === "test value" ? "SUCCESS" : "FAILED");
+        localStorage.removeItem(testKey);
+    } catch (error) {
+        console.error("localStorage error:", error);
+    }
+    
+    // Test Firebase connection if available
+    if (firebaseDB) {
+        console.log("Testing Firebase connection...");
+        firebaseDB.ref('.info/connected').once('value')
+            .then(snap => {
+                console.log("Firebase connected:", snap.val() === true);
+            })
+            .catch(error => {
+                console.error("Firebase connection test error:", error);
+            });
+            
+        // Try to read leaderboard
+        firebaseDB.ref('leaderboard').limitToFirst(1).once('value')
+            .then(snap => {
+                console.log("Leaderboard read test:", snap.exists() ? "SUCCESS" : "No data (may be normal)");
+            })
+            .catch(error => {
+                console.error("Leaderboard read error:", error);
+            });
+    }
+    
+    console.log("=== END DIAGNOSTICS ===");
+    
+    return "Diagnostics logged to console. Press F12 to view.";
+}
+
+// Make diagnostic function globally available (for troubleshooting)
+window.diagnoseStadiumFinder = diagnoseConnectionStatus;
