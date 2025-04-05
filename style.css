@@ -819,3 +819,66 @@ html, body {
     background: linear-gradient(to right, #2980b9, #3498db);
     box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
 }
+
+/* Buy Me a Coffee styling */
+#buy-me-coffee {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    background-color: #FFDD00;
+    color: #000000;
+    padding: 8px 15px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 100;
+    font-size: 14px;
+    border: 2px solid #000;
+}
+
+#buy-me-coffee:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: #FFCC00;
+}
+
+.coffee-icon {
+    font-size: 20px;
+    margin-right: 8px;
+    animation: steam 2s infinite;
+}
+
+.coffee-text {
+    white-space: nowrap;
+}
+
+@keyframes steam {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    #buy-me-coffee {
+        padding: 8px;
+    }
+    
+    .coffee-text {
+        display: none;
+    }
+    
+    .coffee-icon {
+        margin-right: 0;
+        font-size: 24px;
+    }
+}

@@ -991,6 +991,9 @@ function startGame(isMultiplayer = false) {
     if (isMultiplayerMode) {
         updatePlayerStats();
     }
+    
+    // Update Buy Me a Coffee button visibility
+    updateBuyMeCoffeeVisibility();
 }
 
 function updateTargetStadium() {
@@ -1216,6 +1219,9 @@ function endGame(victory) {
     
     // Hide target arrow
     targetArrow.style.display = 'none';
+    
+    // Update Buy Me a Coffee button visibility
+    updateBuyMeCoffeeVisibility();
 }
 
 function resetGame() {
@@ -1375,6 +1381,84 @@ function showLoadingScreen() {
 console.log("Stadium Finder starting up...");
 initializeFirebase();
 console.log("Firebase status: " + (firebaseDB ? "Initialized" : "Not initialized"));
+
+// Get the Buy Me a Coffee button
+const buyMeCoffeeBtn = document.getElementById('buy-me-coffee');
+
+// Make the Buy Me a Coffee button slightly transparent during active gameplay
+function updateBuyMeCoffeeVisibility() {
+    if (gameActive) {
+        buyMeCoffeeBtn.style.opacity = '0.6';
+    } else {
+        buyMeCoffeeBtn.style.opacity = '1';
+    }
+}
+
+// Add event listeners for the Buy Me a Coffee button
+buyMeCoffeeBtn.addEventListener('mouseenter', () => {
+    buyMeCoffeeBtn.style.opacity = '1';
+});
+
+buyMeCoffeeBtn.addEventListener('mouseleave', () => {
+    if (gameActive) {
+        buyMeCoffeeBtn.style.opacity = '0.6';
+    }
+});
+
+// Modify the startGame function to update Buy Me a Coffee button visibility
+const originalStartGame = startGame;
+startGame = function(isMultiplayer) {
+    originalStartGame(isMultiplayer);
+    updateBuyMeCoffeeVisibility();
+};
+
+// Add Buy Me a Coffee visibility update to the existing endGame function
+const originalEndGame = endGame;
+endGame = function(victory) {
+    // Clean up multiplayer resources
+    if (isMultiplayerMode && firebaseDB) {
+        const roomRef = firebaseDB.ref(`rooms/${gameRoomId}`);
+        if (isHost) {
+            roomRef.update({ active: false });
+        }
+    }
+    
+    // Show multiplayer results
+    if (isMultiplayerMode) {
+        let resultText = '';
+        if (score > opponentScore) {
+            resultText = `You win! You beat ${opponentName} by ${score - opponentScore} points.`;
+        } else if (score < opponentScore) {
+            resultText = `${opponentName} wins by ${opponentScore - score} points!`;
+        } else {
+            resultText = `It's a tie! Both players scored ${score} points.`;
+        }
+        
+        // We'll add this to the game-over-modal
+        const multiplayerResult = document.createElement('p');
+        multiplayerResult.textContent = resultText;
+        multiplayerResult.className = 'multiplayer-result';
+        
+        // Remove any previous result
+        const existingResult = document.querySelector('.multiplayer-result');
+        if (existingResult) {
+            existingResult.remove();
+        }
+        
+        // Add before the play again button
+        const playAgainBtn = document.getElementById('play-again-btn');
+        playAgainBtn.parentNode.insertBefore(multiplayerResult, playAgainBtn);
+    }
+    
+    // Reset multiplayer state
+    resetMultiplayerState();
+    
+    // Update Buy Me a Coffee button visibility
+    updateBuyMeCoffeeVisibility();
+    
+    // Call the original endGame function
+    originalEndGame(victory);
+};
 
 // Call this immediately to show loading screen
 showLoadingScreen();
@@ -1884,51 +1968,6 @@ identifyStadium = function() {
     if (isMultiplayerMode) {
         updatePlayerStats();
     }
-};
-
-// Modify the endGame function to handle multiplayer
-const originalEndGame = endGame;
-endGame = function(victory) {
-    // Clean up multiplayer resources
-    if (isMultiplayerMode && firebaseDB) {
-        const roomRef = firebaseDB.ref(`rooms/${gameRoomId}`);
-        if (isHost) {
-            roomRef.update({ active: false });
-        }
-    }
-    
-    // Show multiplayer results
-    if (isMultiplayerMode) {
-        let resultText = '';
-        if (score > opponentScore) {
-            resultText = `You win! You beat ${opponentName} by ${score - opponentScore} points.`;
-        } else if (score < opponentScore) {
-            resultText = `${opponentName} wins by ${opponentScore - score} points!`;
-        } else {
-            resultText = `It's a tie! Both players scored ${score} points.`;
-        }
-        
-        // We'll add this to the game-over-modal
-        const multiplayerResult = document.createElement('p');
-        multiplayerResult.textContent = resultText;
-        multiplayerResult.className = 'multiplayer-result';
-        
-        // Remove any previous result
-        const existingResult = document.querySelector('.multiplayer-result');
-        if (existingResult) {
-            existingResult.remove();
-        }
-        
-        // Add before the play again button
-        const playAgainBtn = document.getElementById('play-again-btn');
-        playAgainBtn.parentNode.insertBefore(multiplayerResult, playAgainBtn);
-    }
-    
-    // Reset multiplayer state
-    resetMultiplayerState();
-    
-    // Call the original endGame function
-    originalEndGame(victory);
 };
 
 // Function to diagnose connection issues
