@@ -352,7 +352,6 @@ function initializeFirebase() {
             projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
             storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
             messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
-            appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
             appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID",
             measurementId: window.env?.FIREBASE_MEASUREMENT_ID || "YOUR_MEASUREMENT_ID"
         };
@@ -361,7 +360,6 @@ function initializeFirebase() {
             apiKey: firebaseConfig.apiKey ? "***" : "NOT SET",
             authDomain: firebaseConfig.authDomain,
             databaseURL: firebaseConfig.databaseURL,
-            projectId: firebaseConfig.projectId
             projectId: firebaseConfig.projectId,
             measurementId: firebaseConfig.measurementId ? "***" : "NOT SET"
         }));
