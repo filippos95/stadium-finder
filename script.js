@@ -1,11 +1,8 @@
 // Make sure to replace this with your actual Mapbox token!
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmthc2lvIiwiYSI6ImNtOHlmeTkwMTAwdTUya3I2MnFucGgwd3EifQ.MNPxypdXbr336CwI09nEmg';
-
-// Track current selected league
-let currentLeague = 'premier'; // 'premier' or 'laliga'
-
-// Premier League Stadium Data
-const premierLeagueStadiums = [
+ 
+// Stadium Data - keep the original stadiumsData array
+const stadiumsData = [
     // Premier League 2024/2025 Season Stadiums
     {
         id: 'emirates_stadium',
@@ -29,9 +26,7 @@ const premierLeagueStadiums = [
         recordAttendance: 60383,
         surface: 'GrassMaster (hybrid grass)',
         architect: 'Populous',
-        cost: '£390 million',
-        country: 'England',
-        league: 'Premier League'
+        cost: '£390 million'
     },
     {
         id: 'villa_park',
@@ -55,9 +50,7 @@ const premierLeagueStadiums = [
         recordAttendance: 76588, // Note: Old record before seating changes
         surface: 'Desso GrassMaster (hybrid grass)',
         architect: 'Archibald Leitch (main stands)',
-        cost: 'N/A (Historic ground)',
-        country: 'England',
-        league: 'Premier League'
+        cost: 'N/A (Historic ground)'
     },
     {
         id: 'vitality_stadium',
@@ -77,9 +70,7 @@ const premierLeagueStadiums = [
         recordAttendance: 28799, // Note: Old record before seating changes
         surface: 'Grass',
         architect: 'N/A (Rebuilt)',
-        cost: 'N/A (Rebuilt)',
-        country: 'England',
-        league: 'Premier League'
+        cost: 'N/A (Rebuilt)'
     },
     {
         id: 'gtech_community_stadium',
@@ -93,9 +84,7 @@ const premierLeagueStadiums = [
         description: 'Home of Brentford F.C.',
         yearBuilt: 2020,
         homeTeams: ['Brentford'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Brentford_Community_Stadium_2021.jpg/640px-Brentford_Community_Stadium_2021.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Brentford_Community_Stadium_2021.jpg/640px-Brentford_Community_Stadium_2021.jpg'
     },
     {
         id: 'amex_stadium',
@@ -109,9 +98,7 @@ const premierLeagueStadiums = [
         description: 'Home of Brighton & Hove Albion F.C.',
         yearBuilt: 2011,
         homeTeams: ['Brighton & Hove Albion'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Falmer_Stadium_aerial_view.jpg/640px-Falmer_Stadium_aerial_view.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Falmer_Stadium_aerial_view.jpg/640px-Falmer_Stadium_aerial_view.jpg'
     },
     {
         id: 'stamford_bridge',
@@ -125,9 +112,7 @@ const premierLeagueStadiums = [
         description: 'Home of Chelsea F.C.',
         yearBuilt: 1877, // Opened
         homeTeams: ['Chelsea'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Stamford_Bridge_Clear_Skies.JPG/640px-Stamford_Bridge_Clear_Skies.JPG',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Stamford_Bridge_Clear_Skies.JPG/640px-Stamford_Bridge_Clear_Skies.JPG'
     },
     {
         id: 'selhurst_park',
@@ -141,9 +126,7 @@ const premierLeagueStadiums = [
         description: 'Home of Crystal Palace F.C.',
         yearBuilt: 1924,
         homeTeams: ['Crystal Palace'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Selhurst_Park_main_stand_and_corporate_boxes.jpg/640px-Selhurst_Park_main_stand_and_corporate_boxes.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Selhurst_Park_main_stand_and_corporate_boxes.jpg/640px-Selhurst_Park_main_stand_and_corporate_boxes.jpg'
     },
     {
         id: 'goodison_park',
@@ -157,9 +140,7 @@ const premierLeagueStadiums = [
         description: 'Home of Everton F.C.',
         yearBuilt: 1892,
         homeTeams: ['Everton'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Goodison_Park_stands_2015.jpg/640px-Goodison_Park_stands_2015.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Goodison_Park_stands_2015.jpg/640px-Goodison_Park_stands_2015.jpg'
     },
     {
         id: 'craven_cottage',
@@ -173,9 +154,7 @@ const premierLeagueStadiums = [
         description: 'Home of Fulham F.C.',
         yearBuilt: 1896,
         homeTeams: ['Fulham'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Craven_Cottage_March_2006.jpg/640px-Craven_Cottage_March_2006.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Craven_Cottage_March_2006.jpg/640px-Craven_Cottage_March_2006.jpg'
     },
     {
         id: 'portman_road',
@@ -189,9 +168,7 @@ const premierLeagueStadiums = [
         description: 'Home of Ipswich Town F.C.',
         yearBuilt: 1884, // Ground established
         homeTeams: ['Ipswich Town'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Portman_Road_From_West_Stand.jpg/640px-Portman_Road_From_West_Stand.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Portman_Road_From_West_Stand.jpg/640px-Portman_Road_From_West_Stand.jpg'
     },
     {
         id: 'king_power_stadium',
@@ -205,9 +182,7 @@ const premierLeagueStadiums = [
         description: 'Home of Leicester City F.C.',
         yearBuilt: 2002,
         homeTeams: ['Leicester City'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/King_Power_Stadium_Aerial_View_%28cropped%29.jpg/640px-King_Power_Stadium_Aerial_View_%28cropped%29.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/King_Power_Stadium_Aerial_View_%28cropped%29.jpg/640px-King_Power_Stadium_Aerial_View_%28cropped%29.jpg'
     },
     {
         id: 'anfield',
@@ -221,9 +196,7 @@ const premierLeagueStadiums = [
         description: 'Home of Liverpool F.C.',
         yearBuilt: 1884, // Ground established
         homeTeams: ['Liverpool'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg/640px-Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg/640px-Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg'
     },
     {
         id: 'etihad_stadium',
@@ -237,9 +210,7 @@ const premierLeagueStadiums = [
         description: 'Home of Manchester City F.C.',
         yearBuilt: 2002,
         homeTeams: ['Manchester City'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Etihad_Stadium.jpg/640px-Etihad_Stadium.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Etihad_Stadium.jpg/640px-Etihad_Stadium.jpg'
     },
     {
         id: 'old_trafford',
@@ -253,9 +224,7 @@ const premierLeagueStadiums = [
         description: 'Home of Manchester United F.C.',
         yearBuilt: 1910,
         homeTeams: ['Manchester United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Old_Trafford_inside_20060726_1.jpg/640px-Old_Trafford_inside_20060726_1.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Old_Trafford_inside_20060726_1.jpg/640px-Old_Trafford_inside_20060726_1.jpg' 
     },
     {
         id: 'st_james_park',
@@ -269,9 +238,7 @@ const premierLeagueStadiums = [
         description: 'Home of Newcastle United F.C.',
         yearBuilt: 1892, // Ground used since 1880
         homeTeams: ['Newcastle United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/St_James%27_Park_aerial_view.jpg/640px-St_James%27_Park_aerial_view.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/St_James%27_Park_aerial_view.jpg/640px-St_James%27_Park_aerial_view.jpg'
     },
     {
         id: 'city_ground',
@@ -285,9 +252,7 @@ const premierLeagueStadiums = [
         description: 'Home of Nottingham Forest F.C.',
         yearBuilt: 1898,
         homeTeams: ['Nottingham Forest'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Citygroundfromriver.jpg/640px-Citygroundfromriver.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Citygroundfromriver.jpg/640px-Citygroundfromriver.jpg'
     },
     {
         id: 'st_marys_stadium',
@@ -301,9 +266,7 @@ const premierLeagueStadiums = [
         description: 'Home of Southampton F.C.',
         yearBuilt: 2001,
         homeTeams: ['Southampton'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/St._Mary%27s_Stadium_-_panoramio_%285%29.jpg/640px-St._Mary%27s_Stadium_-_panoramio_%285%29.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/St._Mary%27s_Stadium_-_panoramio_%285%29.jpg/640px-St._Mary%27s_Stadium_-_panoramio_%285%29.jpg'
     },
     {
         id: 'tottenham_hotspur_stadium',
@@ -317,9 +280,7 @@ const premierLeagueStadiums = [
         description: 'Home of Tottenham Hotspur F.C.',
         yearBuilt: 2019,
         homeTeams: ['Tottenham Hotspur'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Tottenham_Hotspur_Stadium_external_April_2019.jpg/640px-Tottenham_Hotspur_Stadium_external_April_2019.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Tottenham_Hotspur_Stadium_external_April_2019.jpg/640px-Tottenham_Hotspur_Stadium_external_April_2019.jpg'
     },
     {
         id: 'london_stadium',
@@ -333,9 +294,7 @@ const premierLeagueStadiums = [
         description: 'Home of West Ham United F.C.',
         yearBuilt: 2011, // Built for Olympics
         homeTeams: ['West Ham United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/London_Stadium_June_2017.jpg/640px-London_Stadium_June_2017.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/London_Stadium_June_2017.jpg/640px-London_Stadium_June_2017.jpg'
     },
     {
         id: 'molineux_stadium',
@@ -349,238 +308,9 @@ const premierLeagueStadiums = [
         description: 'Home of Wolverhampton Wanderers F.C.',
         yearBuilt: 1889,
         homeTeams: ['Wolverhampton Wanderers'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg/640px-Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg',
-        country: 'England',
-        league: 'Premier League'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg/640px-Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg'
     }
 ];
-
-// Spanish La Liga Stadium Data
-const laLigaStadiums = [
-    {
-        id: 'santiago_bernabeu',
-        name: 'Santiago Bernabéu',
-        lng: -3.6883,
-        lat: 40.4531,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 60,
-        color: 0xFFFFFF, // Real Madrid White
-        description: 'Home of Real Madrid C.F.',
-        yearBuilt: 1947,
-        homeTeams: ['Real Madrid'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Panoramic_santiago_bernabeu.jpg/640px-Panoramic_santiago_bernabeu.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/320px-Real_Madrid_CF.svg.png',
-        capacity: 81044,
-        recordAttendance: 129690,
-        surface: 'Hybrid grass',
-        architect: 'Manuel Muñoz Monasterio, Luis Alemany Soler',
-        cost: 'Renovated for €575 million (2019–2023)',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'camp_nou',
-        name: 'Camp Nou',
-        lng: 2.1228,
-        lat: 41.3809,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 65,
-        color: 0xA50044, // Barcelona Garnet
-        description: 'Home of FC Barcelona',
-        yearBuilt: 1957,
-        homeTeams: ['FC Barcelona'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Camp_Nou_aerial_%28cropped%29.jpg/640px-Camp_Nou_aerial_%28cropped%29.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/320px-FC_Barcelona_%28crest%29.svg.png',
-        capacity: 99354,
-        recordAttendance: 120000,
-        surface: 'Hybrid grass',
-        architect: 'Francesc Mitjans, Josep Soteras',
-        cost: '€1.73 billion (renovation)',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'wanda_metropolitano',
-        name: 'Metropolitano',
-        lng: -3.5986,
-        lat: 40.4362,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 55,
-        color: 0xCB3234, // Atletico Red
-        description: 'Home of Atlético Madrid',
-        yearBuilt: 2017,
-        homeTeams: ['Atlético Madrid'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Wanda_Metropolitano_%28cropped%29.jpg/640px-Wanda_Metropolitano_%28cropped%29.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_Madrid_2017_logo.svg/320px-Atletico_Madrid_2017_logo.svg.png',
-        capacity: 68456,
-        recordAttendance: 68044,
-        surface: 'Hybrid grass',
-        architect: 'Cruz y Ortiz',
-        cost: '€240 million',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'sanchez_pizjuan',
-        name: 'Ramón Sánchez Pizjuán',
-        lng: -5.9702,
-        lat: 37.3839,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 50,
-        color: 0xE31E24, // Sevilla Red
-        description: 'Home of Sevilla FC',
-        yearBuilt: 1958,
-        homeTeams: ['Sevilla FC'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/SanchezPizjuan.jpg/640px-SanchezPizjuan.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/Sevilla_FC_logo.svg/320px-Sevilla_FC_logo.svg.png',
-        capacity: 43883,
-        recordAttendance: 70200,
-        surface: 'Grass',
-        architect: 'Manuel Muñoz Monasterio',
-        cost: 'N/A',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'mestalla',
-        name: 'Mestalla',
-        lng: -0.3581,
-        lat: 39.4747,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 50,
-        color: 0xF68A00, // Valencia Orange
-        description: 'Home of Valencia CF',
-        yearBuilt: 1923,
-        homeTeams: ['Valencia CF'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Mestalla_Stadium_2011.jpg/640px-Mestalla_Stadium_2011.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/ce/Valenciacf.svg/320px-Valenciacf.svg.png',
-        capacity: 49430,
-        recordAttendance: 56500,
-        surface: 'Grass',
-        architect: 'N/A',
-        cost: 'N/A',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'reale_arena',
-        name: 'Reale Arena',
-        lng: -1.9731,
-        lat: 43.3013,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 50,
-        color: 0x0000FF, // Real Sociedad Blue
-        description: 'Home of Real Sociedad',
-        yearBuilt: 1993,
-        homeTeams: ['Real Sociedad'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Donostia-San_Sebasti%C3%A1n_Reale_Arena_Stadium_%28Anoeta%29_%288-2018%29.jpg/640px-Donostia-San_Sebasti%C3%A1n_Reale_Arena_Stadium_%28Anoeta%29_%288-2018%29.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Real_Sociedad_logo.svg/320px-Real_Sociedad_logo.svg.png',
-        capacity: 39500,
-        recordAttendance: 32076,
-        surface: 'Grass',
-        architect: 'Iñaki Barron',
-        cost: '€33 million',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'san_mames',
-        name: 'San Mamés',
-        lng: -2.9425,
-        lat: 43.2641,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 50,
-        color: 0xFF0000, // Athletic Bilbao Red
-        description: 'Home of Athletic Bilbao',
-        yearBuilt: 2013,
-        homeTeams: ['Athletic Bilbao'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/San_Mames_Stadium_%28crop%29.jpg/640px-San_Mames_Stadium_%28crop%29.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Athletic_Club_Bilbao_logo.svg/320px-Athletic_Club_Bilbao_logo.svg.png',
-        capacity: 53331,
-        recordAttendance: 53289,
-        surface: 'Grass',
-        architect: 'César Azcárate',
-        cost: '€211 million',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'benito_villamarin',
-        name: 'Benito Villamarín',
-        lng: -5.9816,
-        lat: 37.3565,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 50,
-        color: 0x00954C, // Real Betis Green
-        description: 'Home of Real Betis',
-        yearBuilt: 1929,
-        homeTeams: ['Real Betis'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Estadio_Benito_Villamarin_2020.jpg/640px-Estadio_Benito_Villamarin_2020.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Real_betis_logo.svg/320px-Real_betis_logo.svg.png',
-        capacity: 60720,
-        recordAttendance: 60720,
-        surface: 'Grass',
-        architect: 'Antonio González Cordón',
-        cost: 'N/A',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'coliseum',
-        name: 'Coliseum Alfonso Pérez',
-        lng: -3.7429,
-        lat: 40.3252,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 45,
-        color: 0x005999, // Getafe Blue
-        description: 'Home of Getafe CF',
-        yearBuilt: 1998,
-        homeTeams: ['Getafe CF'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Coliseum_Alfonso_P%C3%A9rez_%28Getafe%29_02.jpg/640px-Coliseum_Alfonso_P%C3%A9rez_%28Getafe%29_02.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Getafe_logo.svg/320px-Getafe_logo.svg.png',
-        capacity: 17393,
-        recordAttendance: 16300,
-        surface: 'Grass',
-        architect: 'N/A',
-        cost: 'N/A',
-        country: 'Spain',
-        league: 'La Liga'
-    },
-    {
-        id: 'mallorca_son_moix',
-        name: 'Mallorca Son Moix',
-        lng: 2.6334,
-        lat: 39.5913,
-        altitude: 0,
-        modelPath: 'cylinder',
-        scale: 45,
-        color: 0xFF0000, // Mallorca Red
-        description: 'Home of RCD Mallorca',
-        yearBuilt: 1999,
-        homeTeams: ['RCD Mallorca'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/EstadioSonMoix.jpg/640px-EstadioSonMoix.jpg',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/RCD_Mallorca_logo.svg/320px-RCD_Mallorca_logo.svg.png',
-        capacity: 23142,
-        recordAttendance: 23142,
-        surface: 'Grass',
-        architect: 'N/A',
-        cost: 'N/A',
-        country: 'Spain',
-        league: 'La Liga'
-    }
-];
-
-// Active stadiums data - this will be set based on league selection
-let stadiumsData = premierLeagueStadiums;
 
 // Game state variables
 let gameActive = false;
@@ -611,7 +341,7 @@ let firebaseDB = null;
 // Function to initialize Firebase (call this when deploying to production)
 function initializeFirebase() {
     console.log("Initializing Firebase...");
-    
+
     try {
         // Load Firebase configuration from environment variables if available
         // Otherwise, use placeholder configuration
@@ -622,18 +352,20 @@ function initializeFirebase() {
             projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
             storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
             messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
+            appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
             appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID",
             measurementId: window.env?.FIREBASE_MEASUREMENT_ID || "YOUR_MEASUREMENT_ID"
         };
-        
+
         console.log("Firebase config:", JSON.stringify({
             apiKey: firebaseConfig.apiKey ? "***" : "NOT SET",
             authDomain: firebaseConfig.authDomain,
             databaseURL: firebaseConfig.databaseURL,
+            projectId: firebaseConfig.projectId
             projectId: firebaseConfig.projectId,
             measurementId: firebaseConfig.measurementId ? "***" : "NOT SET"
         }));
-        
+
         // Validate essential Firebase config
         if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY" || 
             !firebaseConfig.databaseURL || firebaseConfig.databaseURL === "https://YOUR_PROJECT-default-rtdb.firebaseio.com") {
@@ -659,7 +391,7 @@ function initializeFirebase() {
             }
             
             console.log("Firebase successfully initialized");
-            
+
             // Test connection by reading a value
             firebaseDB.ref('.info/connected').on('value', (snap) => {
                 if (snap.val() === true) {
@@ -753,7 +485,7 @@ function setupMockFirebase() {
                             }
                         });
                     }
-                    
+
                     // Return an object with off method to match Firebase API
                     return {
                         off: () => console.log(`Mock Firebase off for ${path}`)
@@ -961,10 +693,10 @@ map.on('click', (e) => {
         // Move player to clicked location
         playerPosition.lng = e.lngLat.lng;
         playerPosition.lat = e.lngLat.lat;
-        
+
         // Update player marker on mini-map
         playerMarker.setLngLat([playerPosition.lng, playerPosition.lat]);
-        
+
         // Center mini-map on new player position
         miniMap.setCenter([playerPosition.lng, playerPosition.lat]);
     }
@@ -974,12 +706,12 @@ map.on('click', (e) => {
 const keys = {};
 document.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
-    
+
     // Space bar to identify stadium
     if (e.code === 'Space' && gameActive) {
         identifyStadium();
     }
-    
+
     // Toggle exploration mode with E key
     if (e.key.toLowerCase() === 'e' && gameActive) {
         toggleExplorationMode();
@@ -1011,14 +743,14 @@ document.addEventListener('mousemove', (e) => {
     if (gameActive && mouseCaptured && !explorationMode) {
         const deltaX = e.clientX - lastMouseX;
         const deltaY = e.clientY - lastMouseY;
-        
+
         const currentBearing = map.getBearing();
         map.setBearing(currentBearing - deltaX * 0.1);
-        
+
         const currentPitch = map.getPitch();
         const newPitch = currentPitch - deltaY * 0.1;
         map.setPitch(Math.max(0, Math.min(60, newPitch)));
-        
+
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
     }
@@ -1027,55 +759,55 @@ document.addEventListener('mousemove', (e) => {
 // Toggle between exploration and first-person mode
 function toggleExplorationMode() {
     explorationMode = !explorationMode;
-    
+
     if (explorationMode) {
         // Switch to exploration mode
         map.setZoom(9); // Zoom out to see more area
         map.setPitch(0); // Remove pitch for top-down view
-        
+
         // Enable map controls
         map.dragPan.enable();
         map.scrollZoom.enable();
         map.doubleClickZoom.enable();
-        
+
         // Hide first-person UI elements
         targetArrow.style.display = 'none';
         targetIndicator.style.display = 'none';
-        
+
         // Update UI
         if (targetStadium) {
             targetStadiumElement.textContent = 'Target: ' + targetStadium.name;
         }
-        
+
         // Hide stadium markers on minimap in exploration mode
         toggleMinimapMarkers(hideMinimapStadiums);
-        
+
         // Update distance indicator text
         distanceIndicatorElement.textContent = `Click anywhere to move. Find ${targetStadium.name} with no markers!`;
     } else {
         // Switch to first-person mode
         map.setZoom(16);
         map.setPitch(60);
-        
+
         // Disable map controls except for zoom
         map.dragPan.disable();
         map.doubleClickZoom.disable();
         map.scrollZoom.enable(); // Keep zoom enabled
-        
+
         // Show first-person UI elements
         if (targetStadium) {
             targetArrow.style.display = 'block';
             targetIndicator.style.display = 'block';
             targetStadiumElement.textContent = targetStadium.name;
         }
-        
+
         // Show stadium markers on minimap in first-person mode
         toggleMinimapMarkers(false);
-        
+
         // Center map on current player position
         map.setCenter([playerPosition.lng, playerPosition.lat]);
     }
-    
+
     // Update button text if it exists
     if (toggleExplorationBtn) {
         toggleExplorationBtn.textContent = explorationMode ? 'First Person Mode' : 'Exploration Mode';
@@ -1102,9 +834,9 @@ function initializeGame() {
         'tileSize': 512,
         'maxzoom': 14
     });
-    
+
     map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.8 });
-    
+
     // Add fog effect
     map.setFog({
         'color': 'rgba(186, 210, 235, 0.8)', // Light blue/white fog
@@ -1114,7 +846,7 @@ function initializeGame() {
         'star-intensity': 0.6, // Show stars in the night sky
         'range': [0.8, 8] // Fog distance range
     });
-    
+
     // Add 3D buildings with enhanced lighting
     map.addLayer({
         'id': '3d-buildings',
@@ -1148,7 +880,7 @@ function initializeGame() {
             'fill-extrusion-ambient-occlusion-radius': 3
         }
     });
-    
+
     // Add dynamic sky layer
     map.addLayer({
         'id': 'sky',
@@ -1167,88 +899,74 @@ function initializeGame() {
             'sky-atmosphere-sun-intensity': 15
         }
     });
-    
+
     // Add stadium markers to mini-map only (not on main map)
     stadiumsData.forEach(stadium => {
         const el = document.createElement('div');
         el.className = 'mini-map-marker';
         el.dataset.stadiumId = stadium.id;
-        
+
         new mapboxgl.Marker(el)
             .setLngLat([stadium.lng, stadium.lat])
             .addTo(miniMap);
-        
+
         miniMapMarkers.push(el);
-        
+
         // Removed stadium markers from main map to make the game more challenging
     });
-    
+
     // Create player marker for mini-map
     const playerEl = document.createElement('div');
     playerEl.className = 'mini-map-player';
     playerMarker = new mapboxgl.Marker(playerEl)
         .setLngLat([-0.1278, 51.5074])
         .addTo(miniMap);
-    
+
     // Load and show leaderboard after loading screen
     loadLeaderboard();
-    
+
     // Show instructions modal on initial load
     setTimeout(() => {
         showLeaderboard(); // Show leaderboard first
     }, 500);
 }
 
-function startGame(mode = 'singleplayer') {
+function startGame(isMultiplayer = false) {
     // Reset game state
     gameActive = true;
     score = 0;
     timer = 60;
     foundStadiums = [];
-    
-    // Set appropriate stadium data based on current league
-    if (currentLeague === 'premier') {
-        stadiumsData = premierLeagueStadiums;
-    } else if (currentLeague === 'laliga') {
-        stadiumsData = laLigaStadiums;
-    }
-    
+
     // Set multiplayer mode if specified
-    isMultiplayerMode = (mode === 'multiplayer');
-    
+    isMultiplayerMode = isMultiplayer;
+
     // Start in exploration mode
     explorationMode = true;
-    
+
     // Update UI
-    document.getElementById('score').textContent = score;
-    document.getElementById('timer').textContent = timer;
-    document.getElementById('start-game-btn').textContent = 'Restart Game';
-    
-    // Place player at random location in the appropriate region based on league
-    let randomLng, randomLat;
-    if (currentLeague === 'premier') {
-        // UK bounds: roughly between -10 to 2 longitude and 50 to 59 latitude
-        randomLng = -5 + Math.random() * 7; // From -5 to 2
-        randomLat = 50 + Math.random() * 9; // From 50 to 59
-    } else if (currentLeague === 'laliga') {
-        // Spain bounds: roughly between -9 to 3 longitude and 36 to 43 latitude
-        randomLng = -7 + Math.random() * 10; // From -7 to 3
-        randomLat = 36 + Math.random() * 7; // From 36 to 43
-    }
-    
+    scoreElement.textContent = score;
+    timerElement.textContent = timer;
+    startGameBtn.textContent = 'Restart Game';
+
+    // Place player at random location in the UK
+    // UK bounds: roughly between -10 to 2 longitude and 50 to 59 latitude
+    const randomLng = -5 + Math.random() * 7; // From -5 to 2
+    const randomLat = 50 + Math.random() * 9; // From 50 to 59
+
     playerPosition = { lng: randomLng, lat: randomLat };
-    
-    // Select random stadium as target
+
+    // Select random stadium as target instead of nearest
     const availableStadiums = stadiumsData.filter(stadium => !foundStadiums.includes(stadium.id));
     if (availableStadiums.length > 0) {
         const randomIndex = Math.floor(Math.random() * availableStadiums.length);
         targetStadium = availableStadiums[randomIndex];
-        document.getElementById('target-stadium').textContent = 'Target: ' + targetStadium.name;
+        targetStadiumElement.textContent = 'Target: ' + targetStadium.name;
     } else {
         endGame(true);
         return;
     }
-    
+
     // Start with exploration view
     map.flyTo({
         center: [playerPosition.lng, playerPosition.lat],
@@ -1258,11 +976,11 @@ function startGame(mode = 'singleplayer') {
         duration: 2000,
         essential: true
     });
-    
+
     // Update player marker on mini-map
     playerMarker.setLngLat([playerPosition.lng, playerPosition.lat]);
     miniMap.setCenter([playerPosition.lng, playerPosition.lat]);
-    
+
     // Configure map for exploration
     map.dragPan.enable();
     map.scrollZoom.enable();
@@ -1270,58 +988,55 @@ function startGame(mode = 'singleplayer') {
     map.dragRotate.enable();
     map.keyboard.enable();
     map.doubleClickZoom.enable();
-    
+
     // Hide stadium markers on minimap in exploration mode
-    toggleMinimapMarkers(true);
-    
+    toggleMinimapMarkers(hideMinimapStadiums);
+
     // Start game loop
     startGameLoop();
-    
+
     // Start timer
     startTimer();
-    
+
     // Show distance indicator
-    document.getElementById('distance-indicator').style.display = 'block';
-    document.getElementById('distance-indicator').textContent = `Click anywhere to move. Find ${targetStadium.name} with no markers!`;
-    
+    distanceIndicatorElement.style.display = 'block';
+    distanceIndicatorElement.textContent = `Click anywhere to move. Find ${targetStadium.name} with no markers!`;
+
     // Hide target arrow in exploration mode
-    document.getElementById('target-arrow').style.display = 'none';
-    
+    targetArrow.style.display = 'none';
+
     // Show compass
-    document.getElementById('compass').style.display = 'block';
-    
+    compass.style.display = 'block';
+
     // If multiplayer, initialize player stats
     if (isMultiplayerMode) {
         updatePlayerStats();
     }
-    
+
     // Update Buy Me a Coffee button visibility
     updateBuyMeCoffeeVisibility();
     
     // Log game_start event
-    if (analyticsAvailable()) {
-        logEvent(analytics, 'game_start', {
-            multiplayer_mode: isMultiplayerMode,
-            exploration_mode: explorationMode,
-            selected_league: currentLeague
-        });
-    }
+    logAnalyticsEvent('game_start', {
+        multiplayer_mode: isMultiplayer,
+        exploration_mode: explorationMode
+    });
 }
 
 function updateTargetStadium() {
     // Filter out already found stadiums
     const availableStadiums = stadiumsData.filter(stadium => !foundStadiums.includes(stadium.id));
-    
+
     // If we have no more stadiums to find, game over with victory
     if (availableStadiums.length === 0) {
         endGame(true);
         return;
     }
-    
+
     // Select a random stadium from the available ones
     const randomIndex = Math.floor(Math.random() * availableStadiums.length);
     targetStadium = availableStadiums[randomIndex];
-    
+
     // Update UI to show target name in both modes, but no location hints in exploration mode
     targetStadiumElement.textContent = explorationMode ? 'Find: ' + targetStadium.name : targetStadium.name;
 }
@@ -1330,35 +1045,35 @@ function startGameLoop() {
     // Set up game loop
     function gameLoop() {
         if (!gameActive) return;
-        
+
         // Only handle movement in first-person mode
         if (!explorationMode) {
             movePlayer();
         }
-        
+
         // Always update mini-map player position
         playerMarker.setLngLat([playerPosition.lng, playerPosition.lat]);
-        
+
         // In first-person mode, center the mini-map on player
         if (!explorationMode) {
             miniMap.setCenter([playerPosition.lng, playerPosition.lat]);
         }
-        
+
         // Update target arrow only in first-person mode
         if (!explorationMode && targetStadium) {
             updateTargetArrow();
         }
-        
+
         // Update compass in all modes
         updateCompass();
-        
+
         // Update distance indicator - different for each mode
         if (targetStadium) {
             const distance = getDistance(
                 playerPosition.lat, playerPosition.lng,
                 targetStadium.lat, targetStadium.lng
             );
-            
+
             if (explorationMode) {
                 // In exploration mode, give general distance info but don't direct
                 if (distance < 0.5) { // 500 meters
@@ -1376,9 +1091,9 @@ function startGameLoop() {
                 } else {
                     distanceText = `${distance.toFixed(1)} km`;
                 }
-                
+
                 distanceIndicatorElement.textContent = `Distance to ${targetStadium.name}: ${distanceText}`;
-                
+
                 // Visual indication when very close
                 if (distance < 0.5) { // 500 meters
                     distanceIndicatorElement.style.backgroundColor = 'rgba(39, 174, 96, 0.8)';
@@ -1387,10 +1102,10 @@ function startGameLoop() {
                 }
             }
         }
-        
+
         requestAnimationFrame(gameLoop);
     }
-    
+
     gameLoop();
 }
 
@@ -1399,10 +1114,10 @@ function movePlayer() {
     const speed = 0.0003; // Adjust for desired movement speed
     const bearing = map.getBearing();
     const bearingRadians = bearing * Math.PI / 180;
-    
+
     let dx = 0;
     let dy = 0;
-    
+
     // Forward/backward
     if (keys['w'] || keys['arrowup']) {
         dx += Math.sin(bearingRadians) * speed;
@@ -1412,7 +1127,7 @@ function movePlayer() {
         dx -= Math.sin(bearingRadians) * speed;
         dy -= Math.cos(bearingRadians) * speed;
     }
-    
+
     // Strafe left/right
     if (keys['a'] || keys['arrowleft']) {
         dx -= Math.sin(bearingRadians + Math.PI/2) * speed;
@@ -1422,22 +1137,22 @@ function movePlayer() {
         dx += Math.sin(bearingRadians + Math.PI/2) * speed;
         dy += Math.cos(bearingRadians + Math.PI/2) * speed;
     }
-    
+
     // Update player position
     playerPosition.lng += dx;
     playerPosition.lat += dy;
-    
+
     // Update map center
     map.setCenter([playerPosition.lng, playerPosition.lat]);
 }
 
 function startTimer() {
     clearInterval(timerInterval);
-    
+
     timerInterval = setInterval(() => {
         timer--;
         timerElement.textContent = timer;
-        
+
         if (timer <= 0) {
             endGame(false);
         }
@@ -1447,39 +1162,39 @@ function startTimer() {
 function identifyStadium() {
     // We only want to identify the target stadium, regardless of mode
     if (!targetStadium) return;
-    
+
     const distance = getDistance(
         playerPosition.lat, playerPosition.lng,
         targetStadium.lat, targetStadium.lng
     );
-    
+
     // If close enough to the target stadium (500 meters)
     if (distance < 0.5) {
         // Add points based on distance - closer = more points
         const pointsAwarded = Math.round(100 * (1 - distance/0.5));
         score += pointsAwarded;
         scoreElement.textContent = score;
-        
+
         // Show stadium info
         showInfoPanel(targetStadium.id);
-        
+
         // Mark as found
         foundStadiums.push(targetStadium.id);
-        
+
         // Add visual celebration effect
         addCelebrationEffect();
-        
+
         // Update target to next stadium
         updateTargetStadium();
-        
+
         // Add time bonus
         timer += 20;
         timerElement.textContent = timer;
-        
+
         // Visual feedback
         distanceIndicatorElement.textContent = `Found ${targetStadium.name}! +${pointsAwarded} points, +20 seconds`;
         distanceIndicatorElement.style.backgroundColor = 'rgba(241, 196, 15, 0.8)';
-        
+
         setTimeout(() => {
             if (gameActive) {
                 distanceIndicatorElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
@@ -1489,7 +1204,7 @@ function identifyStadium() {
         // Not close enough - give feedback
         distanceIndicatorElement.textContent = `Too far from ${targetStadium.name} (${distance.toFixed(1)} km)`;
         distanceIndicatorElement.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
-        
+
         setTimeout(() => {
             if (gameActive) {
                 distanceIndicatorElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
@@ -1501,37 +1216,37 @@ function identifyStadium() {
 function endGame(victory) {
     gameActive = false;
     clearInterval(timerInterval);
-    
+
     // Show game over screen
     finalScoreElement.textContent = score;
     stadiumsFoundElement.textContent = foundStadiums.length;
-    
+
     if (victory) {
         document.querySelector('#game-over-modal h2').textContent = 'Victory!';
     } else {
         document.querySelector('#game-over-modal h2').textContent = 'Game Over!';
     }
-    
+
     // Ask for player name and save score
     if (score > 0) {
         // Use setTimeout to ensure the modal is shown before the prompt
         setTimeout(() => {
             playerName = prompt('Enter your name for the leaderboard:', playerName || 'Player');
-            
+
             if (playerName) {
                 saveScore(playerName, score, foundStadiums.length);
             }
         }, 500);
     }
-    
+
     gameOverModal.style.display = 'block';
-    
+
     // Hide distance indicator
     distanceIndicatorElement.style.display = 'none';
-    
+
     // Hide target arrow
     targetArrow.style.display = 'none';
-    
+
     // Update Buy Me a Coffee button visibility
     updateBuyMeCoffeeVisibility();
     
@@ -1548,7 +1263,7 @@ function endGame(victory) {
 function resetGame() {
     // Hide modals
     gameOverModal.style.display = 'none';
-    
+
     // Reset and start a new game
     startGame();
 }
@@ -1572,7 +1287,7 @@ function showInfoPanel(stadiumId) {
     panelStadiumSurface.textContent = stadium.surface || 'N/A';
     panelStadiumArchitect.textContent = stadium.architect || 'N/A';
     panelStadiumCost.textContent = stadium.cost || 'N/A';
-    
+
     panelStadiumTeams.innerHTML = '';
     if (stadium.homeTeams && stadium.homeTeams.length > 0) {
         stadium.homeTeams.forEach(team => {
@@ -1584,7 +1299,7 @@ function showInfoPanel(stadiumId) {
     } else {
         panelStadiumTeams.parentElement.style.display = 'none';
     }
-    
+
     infoPanel.classList.add('visible');
 }
 
@@ -1598,25 +1313,25 @@ function updateTargetArrow() {
         targetArrow.style.display = 'none';
         return;
     }
-    
+
     targetArrow.style.display = 'block';
-    
+
     // Calculate angle between player and stadium
     const dx = targetStadium.lng - playerPosition.lng;
     const dy = targetStadium.lat - playerPosition.lat;
-    
+
     // Get map bearing in radians
     const mapBearing = map.getBearing() * Math.PI / 180;
-    
+
     // Calculate angle in radians
     let angle = Math.atan2(dy, dx);
-    
+
     // Adjust for map bearing
     angle = angle - mapBearing;
-    
+
     // Convert to degrees and normalize
     let degrees = angle * 180 / Math.PI + 90;
-    
+
     // Apply rotation to arrow
     targetArrow.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
 }
@@ -1641,18 +1356,18 @@ function addCelebrationEffect() {
     const container = document.createElement('div');
     container.className = 'celebration-effect';
     document.body.appendChild(container);
-    
+
     // Create particles
     for (let i = 0; i < 50; i++) {
         const particle = document.createElement('div');
         particle.className = 'celebration-particle';
-        
+
         // Randomize particle properties
         const size = 5 + Math.random() * 15;
         const color = `hsl(${Math.random() * 360}, 100%, 60%)`;
         const left = 40 + Math.random() * 20; // Center horizontally
         const duration = 1 + Math.random() * 2;
-        
+
         // Set particle style
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
@@ -1660,10 +1375,10 @@ function addCelebrationEffect() {
         particle.style.left = `${left}%`;
         particle.style.animationDuration = `${duration}s`;
         particle.style.animationDelay = `${Math.random() * 0.5}s`;
-        
+
         container.appendChild(particle);
     }
-    
+
     // Remove the effect after animation completes
     setTimeout(() => {
         container.remove();
@@ -1676,14 +1391,14 @@ function showLoadingScreen() {
     if (!firebaseDB) {
         initializeFirebase();
     }
-    
+
     let progress = 0;
     const loadingInterval = setInterval(() => {
         progress += Math.random() * 10;
         if (progress >= 100) {
             progress = 100;
             clearInterval(loadingInterval);
-            
+
             // Fade out loading screen
             setTimeout(() => {
                 loadingScreen.style.opacity = 0;
@@ -1759,7 +1474,7 @@ endGame = function(victory) {
             roomRef.update({ active: false });
         }
     }
-    
+
     // Log game_end event
     logAnalyticsEvent('game_end', {
         victory: victory,
@@ -1783,7 +1498,7 @@ endGame = function(victory) {
         } else {
             resultText = `It's a tie! Both players scored ${score} points.`;
         }
-        
+
         // Log multiplayer_match_end event
         logAnalyticsEvent('multiplayer_match_end', {
             match_result: matchResult,
@@ -1796,24 +1511,24 @@ endGame = function(victory) {
         const multiplayerResult = document.createElement('p');
         multiplayerResult.textContent = resultText;
         multiplayerResult.className = 'multiplayer-result';
-        
+
         // Remove any previous result
         const existingResult = document.querySelector('.multiplayer-result');
         if (existingResult) {
             existingResult.remove();
         }
-        
+
         // Add before the play again button
         const playAgainBtn = document.getElementById('play-again-btn');
         playAgainBtn.parentNode.insertBefore(multiplayerResult, playAgainBtn);
     }
-    
+
     // Reset multiplayer state
     resetMultiplayerState();
-    
+
     // Update Buy Me a Coffee button visibility
     updateBuyMeCoffeeVisibility();
-    
+
     // Call the original endGame function
     originalEndGame(victory);
 };
@@ -1838,27 +1553,27 @@ function showLeaderboard() {
 // Load scores from Firebase (or localStorage as fallback) and populate the leaderboard
 function loadLeaderboard() {
     leaderboardEntries.innerHTML = '';
-    
+
     // If Firebase is available, use it for leaderboard
     if (firebaseDB) {
         console.log("Loading leaderboard from Firebase...");
         const leaderboardRef = firebaseDB.ref('leaderboard');
-        
+
         // Get all scores and sort them in memory (most reliable approach)
         leaderboardRef.once('value')
             .then((snapshot) => {
                 const highScores = [];
-                
+
                 // Convert Firebase data to array
                 snapshot.forEach((childSnapshot) => {
                     highScores.push(childSnapshot.val());
                 });
-                
+
                 console.log(`Loaded ${highScores.length} scores from Firebase`);
-                
+
                 // Sort by score (highest first)
                 highScores.sort((a, b) => b.score - a.score);
-                
+
                 displayLeaderboard(highScores);
             })
             .catch((error) => {
@@ -1883,11 +1598,11 @@ function displayLeaderboard(highScores) {
         leaderboardEntries.appendChild(row);
         return;
     }
-    
+
     // Display top 10 scores
     highScores.slice(0, 10).forEach((entry, index) => {
         const row = document.createElement('tr');
-        
+
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${entry.name}</td>
@@ -1895,7 +1610,7 @@ function displayLeaderboard(highScores) {
             <td>${entry.stadiumsFound}</td>
             <td>${formatDate(entry.date)}</td>
         `;
-        
+
         leaderboardEntries.appendChild(row);
     });
 }
@@ -1909,7 +1624,7 @@ function getLocalHighScores() {
 // Save score to leaderboard (Firebase + localStorage fallback)
 function saveScore(name, score, stadiumsFound) {
     console.log(`Saving score for ${name}: ${score} points, ${stadiumsFound} stadiums`);
-    
+
     // Generate a unique ID for the score
     const scoreId = Date.now().toString();
     const scoreData = {
@@ -1918,7 +1633,7 @@ function saveScore(name, score, stadiumsFound) {
         stadiumsFound: stadiumsFound,
         date: new Date().toISOString()
     };
-    
+
     // Save to Firebase if available
     if (firebaseDB) {
         console.log("Saving score to Firebase");
@@ -1933,17 +1648,17 @@ function saveScore(name, score, stadiumsFound) {
     } else {
         console.log("Firebase not available, saving to localStorage only");
     }
-    
+
     // Also save to localStorage as fallback
     const highScores = getLocalHighScores();
     highScores.push(scoreData);
-    
+
     // Sort by score (highest first)
     highScores.sort((a, b) => b.score - a.score);
-    
+
     // Keep only top 50 scores
     const topScores = highScores.slice(0, 50);
-    
+
     // Save back to localStorage
     localStorage.setItem('stadiumFinderHighScores', JSON.stringify(topScores));
     console.log("Score saved to localStorage");
@@ -1957,10 +1672,10 @@ function clearLeaderboard() {
             const leaderboardRef = firebaseDB.ref('leaderboard');
             leaderboardRef.remove();
         }
-        
+
         // Also clear localStorage
         localStorage.removeItem('stadiumFinderHighScores');
-        
+
         // Refresh display
         loadLeaderboard();
     }
@@ -1984,16 +1699,16 @@ function showMultiplayerModal() {
     if (!firebaseDB) {
         initializeFirebase();
     }
-    
+
     // Reset multiplayer state
     resetMultiplayerSections();
-    
+
     // Show the modal
     multiplayerModal.style.display = 'block';
-    
+
     // Show login section by default
     multiplayerLoginSection.style.display = 'block';
-    
+
     // If player already has a nickname, go straight to menu
     if (playerNickname) {
         multiplayerLoginSection.style.display = 'none';
@@ -2009,14 +1724,14 @@ function hideMultiplayerModal() {
 // Set player nickname for multiplayer
 function setPlayerNickname() {
     const nickname = playerNicknameInput.value.trim();
-    
+
     if (nickname.length < 3) {
         alert('Please enter a nickname with at least 3 characters');
         return;
     }
-    
+
     playerNickname = nickname;
-    
+
     // Move to the menu section
     multiplayerLoginSection.style.display = 'none';
     multiplayerMenuSection.style.display = 'block';
@@ -2026,11 +1741,11 @@ function setPlayerNickname() {
 function generateGameCode() {
     const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar looking characters
     let result = '';
-    
+
     for (let i = 0; i < 4; i++) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    
+
     return result;
 }
 
@@ -2038,11 +1753,11 @@ function generateGameCode() {
 function createMultiplayerGame() {
     // Generate a random game code
     gameRoomId = generateGameCode();
-    
+
     // Set player as host
     isHost = true;
     isMultiplayerMode = true;
-    
+
     // Log multiplayer_create_game event
     logAnalyticsEvent('multiplayer_create_game', {
         game_code: gameRoomId,
@@ -2056,14 +1771,14 @@ function createMultiplayerGame() {
     guestStatusDisplay.className = 'status-badge waiting';
     guestStatusDisplay.textContent = 'Waiting';
     startMultiplayerBtn.disabled = true;
-    
+
     // Create the game room in Firebase
     createGameRoom();
-    
+
     // Show the waiting room
     multiplayerMenuSection.style.display = 'none';
     waitingRoomSection.style.display = 'block';
-    
+
     // Start listening for player joins
     listenForPlayerJoins();
 }
@@ -2078,7 +1793,7 @@ function createGameRoom() {
             gameStarted: false,
             created: new Date().toISOString()
         });
-        
+
         // Set up player data
         const playersRef = firebaseDB.ref(`rooms/${gameRoomId}/players/host`);
         playersRef.set({
@@ -2097,13 +1812,13 @@ function listenForPlayerJoins() {
         guestRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const guestData = snapshot.val();
-                
+
                 // Update UI
                 guestNameDisplay.textContent = guestData.name;
                 guestStatusDisplay.className = 'status-badge ready';
                 guestStatusDisplay.textContent = 'Ready';
                 startMultiplayerBtn.disabled = false;
-                
+
                 // Store opponent name
                 opponentName = guestData.name;
             }
@@ -2122,15 +1837,15 @@ function showJoinGameSection() {
 // Join an existing game
 function joinGameRoom() {
     const code = joinCodeInput.value.trim().toUpperCase();
-    
+
     if (code.length !== 4) {
         joinErrorDisplay.textContent = 'Please enter a valid 4-character game code';
         return;
     }
-    
+
     console.log("Attempting to join room:", code);
     joinErrorDisplay.textContent = 'Connecting...';
-    
+
     // Log multiplayer_join_attempt event
     logAnalyticsEvent('multiplayer_join_attempt', {
         game_code: code,
@@ -2140,7 +1855,7 @@ function joinGameRoom() {
     // Check if room exists
     if (firebaseDB) {
         const roomRef = firebaseDB.ref(`rooms/${code}`);
-        
+
         // Fix: Use correct Firebase method
         roomRef.once('value')
             .then((snapshot) => {
@@ -2150,11 +1865,11 @@ function joinGameRoom() {
                     gameRoomId = code;
                     isHost = false;
                     isMultiplayerMode = true;
-                    
+
                     // Join the room
                     const hostName = snapshot.val().hostName;
                     opponentName = hostName;
-                    
+
                     // Log multiplayer_join_success event
                     logAnalyticsEvent('multiplayer_join_success', {
                         game_code: code,
@@ -2165,7 +1880,7 @@ function joinGameRoom() {
                     gameCodeDisplay.textContent = gameRoomId;
                     hostNameDisplay.textContent = hostName;
                     guestNameDisplay.textContent = playerNickname;
-                    
+
                     // Add player to the room
                     const guestRef = firebaseDB.ref(`rooms/${gameRoomId}/players/guest`);
                     return guestRef.set({
@@ -2187,7 +1902,7 @@ function joinGameRoom() {
             .then(() => {
                 // Listen for game start
                 listenForGameStart();
-                
+
                 // Show waiting room
                 joinGameSection.style.display = 'none';
                 waitingRoomSection.style.display = 'block';
@@ -2203,12 +1918,12 @@ function joinGameRoom() {
         gameRoomId = code;
         isHost = false;
         isMultiplayerMode = true;
-        
+
         // Update UI
         gameCodeDisplay.textContent = gameRoomId;
         hostNameDisplay.textContent = "Test Host";
         guestNameDisplay.textContent = playerNickname;
-        
+
         // Show waiting room
         joinGameSection.style.display = 'none';
         waitingRoomSection.style.display = 'block';
@@ -2243,19 +1958,19 @@ function startMultiplayerGame() {
             guest_name: opponentName
         });
     }
-    
+
     // Hide multiplayer modal
     hideMultiplayerModal();
-    
+
     // Start game with multiplayer mode
     startGame(true);
-    
+
     // Show opponent status
     opponentStatusDisplay.classList.remove('hidden');
     opponentNameDisplay.textContent = opponentName;
     opponentScoreDisplay.textContent = '0';
     opponentStadiumsDisplay.textContent = '0';
-    
+
     // Listen for opponent updates
     listenForOpponentUpdates();
 }
@@ -2265,16 +1980,16 @@ function listenForOpponentUpdates() {
     if (firebaseDB) {
         const opponentType = isHost ? 'guest' : 'host';
         const opponentRef = firebaseDB.ref(`rooms/${gameRoomId}/players/${opponentType}`);
-        
+
         // Fix: Use correct Firebase method
         opponentRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                
+
                 // Update opponent info
                 opponentScore = data.score;
                 opponentStadiums = data.stadiumsFound;
-                
+
                 // Update UI
                 opponentScoreDisplay.textContent = opponentScore;
                 opponentStadiumsDisplay.textContent = opponentStadiums;
@@ -2288,7 +2003,7 @@ function updatePlayerStats() {
     if (isMultiplayerMode && firebaseDB) {
         const playerType = isHost ? 'host' : 'guest';
         const playerRef = firebaseDB.ref(`rooms/${gameRoomId}/players/${playerType}`);
-        
+
         playerRef.update({
             score: score,
             stadiumsFound: foundStadiums.length
@@ -2309,10 +2024,10 @@ function leaveGameRoom() {
             guestRef.remove();
         }
     }
-    
+
     // Reset multiplayer state
     resetMultiplayerState();
-    
+
     // Go back to menu
     waitingRoomSection.style.display = 'none';
     multiplayerMenuSection.style.display = 'block';
@@ -2322,7 +2037,7 @@ function leaveGameRoom() {
 function returnToSoloMode() {
     // Reset multiplayer state
     resetMultiplayerState();
-    
+
     // Close modal
     hideMultiplayerModal();
 }
@@ -2343,11 +2058,12 @@ function resetMultiplayerState() {
     opponentName = "";
     opponentScore = 0;
     opponentStadiums = 0;
-    
+
     // Hide opponent status
     opponentStatusDisplay.classList.add('hidden');
 }
 
+// Modify the existing identifyStadium function to update multiplayer stats
 // Modify the existing identifyStadium function to update multiplayer stats and track analytics
 const originalIdentifyStadium = identifyStadium;
 identifyStadium = function() {
@@ -2363,13 +2079,13 @@ identifyStadium = function() {
     
     // Call the original function
     originalIdentifyStadium();
-    
+
     // Check if a stadium was found by comparing the counts
     if (foundStadiums.length > stadiumCountBefore) {
         // Log stadium_found event
         logAnalyticsEvent('stadium_found', {
             stadium_name: stadiumNameBefore,
-            distance_km: distance?.toFixed(3) || 'N/A',
+            distance_km: distance.toFixed(3),
             exploration_mode: explorationMode,
             stadiums_found_count: foundStadiums.length,
             current_score: score,
@@ -2387,14 +2103,14 @@ identifyStadium = function() {
 function diagnoseConnectionStatus() {
     console.log("=== STADIUM FINDER DIAGNOSTICS ===");
     console.log("Firebase DB initialized:", !!firebaseDB);
-    
+
     // Check environment variables
     console.log("Environment vars available:", !!window.env);
     if (window.env) {
         console.log("API Key configured:", !!window.env.FIREBASE_API_KEY);
         console.log("Database URL configured:", !!window.env.FIREBASE_DATABASE_URL);
     }
-    
+
     // Test localStorage
     const testKey = "diagnostics_test";
     try {
@@ -2406,7 +2122,7 @@ function diagnoseConnectionStatus() {
     } catch (error) {
         console.error("localStorage error:", error);
     }
-    
+
     // Test Firebase connection if available
     if (firebaseDB) {
         console.log("Testing Firebase connection...");
@@ -2417,7 +2133,7 @@ function diagnoseConnectionStatus() {
             .catch(error => {
                 console.error("Firebase connection test error:", error);
             });
-            
+
         // Try to read leaderboard
         firebaseDB.ref('leaderboard').limitToFirst(1).once('value')
             .then(snap => {
@@ -2427,9 +2143,9 @@ function diagnoseConnectionStatus() {
                 console.error("Leaderboard read error:", error);
             });
     }
-    
+
     console.log("=== END DIAGNOSTICS ===");
-    
+
     return "Diagnostics logged to console. Press F12 to view.";
 }
 
@@ -2439,28 +2155,28 @@ window.diagnoseStadiumFinder = diagnoseConnectionStatus;
 // Adding a debugging function for Firebase
 function testAndFixFirebase() {
     console.log("====== TESTING FIREBASE CONNECTION ======");
-  
+
     // Step 1: Test basic Firebase connectivity
     console.log("Step 1: Testing Firebase connectivity...");
     if (!window.firebase) {
         console.error("❌ Firebase SDK not loaded!");
         return "Firebase SDK not found. Check your script inclusions.";
     }
-    
+
     try {
         // Initialize Firebase if not already initialized
         if (!firebaseDB) {
             console.log("Initializing Firebase for testing...");
             initializeFirebase();
         }
-        
+
         if (!firebaseDB) {
             console.error("❌ Firebase database not initialized!");
             return "Firebase initialization failed. Check console for errors.";
         }
-        
+
         console.log("✅ Firebase SDK loaded and database initialized");
-        
+
         // Step 2: Test write permission
         console.log("Step 2: Testing write permission...");
         const testRef = firebaseDB.ref(`test/connection-${Date.now()}`);
@@ -2470,10 +2186,10 @@ function testAndFixFirebase() {
         })
         .then(() => {
             console.log("✅ Write permission test passed");
-            
+
             // Remove test data
             testRef.remove();
-            
+
             // Step 3: Test read permission for leaderboard
             console.log("Step 3: Testing leaderboard read permission...");
             return firebaseDB.ref('leaderboard').limitToFirst(1).once('value');
@@ -2481,18 +2197,18 @@ function testAndFixFirebase() {
         .then((snapshot) => {
             console.log("✅ Read permission test passed");
             console.log(`Leaderboard exists: ${snapshot.exists()}`);
-            
+
             // Step 4: Force refresh leaderboard
             console.log("Step 4: Forcing leaderboard refresh...");
             loadLeaderboard();
             console.log("✅ Leaderboard refresh triggered");
-            
+
             console.log("====== ALL TESTS PASSED ======");
             return "Firebase tests passed successfully! Leaderboard should now be working.";
         })
         .catch((error) => {
             console.error("❌ Permission error:", error);
-            
+
             if (error.code === "PERMISSION_DENIED") {
                 console.error("Firebase security rules may need updating!");
                 console.log("You need these rules for your leaderboard:");
@@ -2515,7 +2231,7 @@ function testAndFixFirebase() {
   }
 }`);
             }
-            
+
             return `Firebase test failed: ${error.message}. Check console for details.`;
         });
     } catch (error) {
@@ -2525,6 +2241,7 @@ function testAndFixFirebase() {
 }
 
 // Make test function globally available
+window.testAndFixFirebase = testAndFixFirebase;
 window.testAndFixFirebase = testAndFixFirebase;
 
 // Helper function to log Analytics events if available
@@ -2601,391 +2318,3 @@ function verifyFirebaseAnalytics() {
 
 // Make the verify function globally available
 window.verifyFirebaseAnalytics = verifyFirebaseAnalytics;
-
-// Function to create the league selection modal
-function createLeagueSelectionModal() {
-    const modal = document.createElement('div');
-    modal.id = 'leagueSelectionModal';
-    modal.className = 'modal';
-    modal.style.display = 'none'; // Start hidden, will be shown when needed
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2>Select a League</h2>
-            <p>Choose which league's stadiums you want to find:</p>
-            <div class="league-options">
-                <div class="league-option" data-league="premier">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png" alt="Premier League">
-                    <h3>Premier League</h3>
-                    <p>${premierLeagueStadiums.length} stadiums</p>
-                </div>
-                <div class="league-option" data-league="laliga">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png" alt="La Liga">
-                    <h3>La Liga</h3>
-                    <p>${laLigaStadiums.length} stadiums</p>
-                </div>
-            </div>
-            <button id="startWithSelectedLeague" class="primary-button" disabled>Start Game</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Add event listeners for league selection
-    const leagueOptions = document.querySelectorAll('.league-option');
-    const startButton = document.getElementById('startWithSelectedLeague');
-    
-    leagueOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            console.log('League option clicked:', option.dataset.league);
-            // Remove selected class from all options
-            leagueOptions.forEach(opt => opt.classList.remove('selected'));
-            // Add selected class to the clicked option
-            option.classList.add('selected');
-            // Enable the start button
-            startButton.disabled = false;
-        });
-    });
-
-    // Start game with selected league
-    startButton.addEventListener('click', () => {
-        console.log('Start button clicked');
-        const selectedLeague = document.querySelector('.league-option.selected').dataset.league;
-        console.log('Selected league:', selectedLeague);
-        selectLeague(selectedLeague);
-        modal.style.display = 'none';
-        startGame();
-    });
-
-    console.log('League selection modal created');
-    return modal;
-}
-
-// Function to handle league selection
-function selectLeague(league) {
-    console.log(`Selecting league: ${league}`);
-    currentLeague = league;
-    
-    console.log(`Setting stadiumsData to ${league === 'premier' ? 'premierLeagueStadiums' : 'laLigaStadiums'}`);
-    // Update active stadiums based on selection
-    if (league === 'premier') {
-        stadiumsData = premierLeagueStadiums;
-        
-        // Try to update the league indicator if it exists
-        const leagueIcon = document.getElementById('leagueIcon');
-        const leagueText = document.getElementById('leagueText');
-        
-        if (leagueIcon) {
-            leagueIcon.src = 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png';
-        }
-        
-        if (leagueText) {
-            leagueText.textContent = 'Premier League';
-        }
-    } else if (league === 'laliga') {
-        stadiumsData = laLigaStadiums;
-        
-        // Try to update the league indicator if it exists
-        const leagueIcon = document.getElementById('leagueIcon');
-        const leagueText = document.getElementById('leagueText');
-        
-        if (leagueIcon) {
-            leagueIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png';
-        }
-        
-        if (leagueText) {
-            leagueText.textContent = 'La Liga';
-        }
-    }
-    
-    console.log(`stadiumsData now has ${stadiumsData.length} stadiums`);
-
-    // Log analytics event for league selection
-    if (analyticsAvailable()) {
-        logEvent(analytics, 'league_selected', {
-            league_name: league === 'premier' ? 'Premier League' : 'La Liga',
-            stadium_count: stadiumsData.length
-        });
-    }
-}
-
-// Update startGame function to accommodate league selection
-function startGame(mode = 'singleplayer') {
-    // ... existing startGame code ...
-
-    // Add this at the beginning of the function
-    if (!gameStarted) {
-        // Set appropriate stadium data based on current league
-        if (currentLeague === 'premier') {
-            stadiumsData = premierLeagueStadiums;
-        } else if (currentLeague === 'laliga') {
-            stadiumsData = laLigaStadiums;
-        }
-    }
-
-    // Continue with rest of startGame function
-    // ... existing code ...
-}
-
-// Add the CSS for league selection to the existing style element
-const styleElement = document.createElement('style');
-styleElement.textContent = `
-    /* Existing CSS styles */
-    body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-    #controls { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 4px; max-width: 300px; }
-    #leaderboard { position: absolute; top: 10px; right: 10px; z-index: 1; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 4px; max-width: 300px; display: none; }
-    #leaderboard h3 { margin-top: 0; }
-    .stadium-card { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 2; max-width: 400px; display: none; }
-    .stadium-card h2 { margin-top: 0; }
-    .stadium-card img { width: 100%; height: auto; border-radius: 4px; margin-bottom: 10px; }
-    .stadium-card button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-    .stadium-card button:hover { background: #45a049; }
-    .score-input { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 3; display: none; text-align: center; }
-    .score-input input { padding: 8px; margin: 10px 0; width: 100%; box-sizing: border-box; }
-    .score-input button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
-    .score-input button:hover { background: #45a049; }
-    .score-input .cancel { background: #f44336; }
-    .score-input .cancel:hover { background: #d32f2f; }
-    
-    /* League Selection Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.7);
-    }
-    
-    .modal-content {
-        position: relative;
-        background-color: #fefefe;
-        margin: 10% auto;
-        padding: 20px;
-        border-radius: 10px;
-        width: 80%;
-        max-width: 600px;
-        text-align: center;
-    }
-    
-    .league-options {
-        display: flex;
-        justify-content: space-around;
-        margin: 20px 0;
-        flex-wrap: wrap;
-    }
-    
-    .league-option {
-        background-color: #f9f9f9;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        cursor: pointer;
-        width: 40%;
-        min-width: 200px;
-        margin: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .league-option:hover {
-        transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .league-option.selected {
-        border-color: #4CAF50;
-        background-color: rgba(76, 175, 80, 0.1);
-    }
-    
-    .league-option img {
-        max-width: 100px;
-        height: auto;
-        margin-bottom: 10px;
-    }
-    
-    .primary-button {
-        background: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    
-    .primary-button:hover {
-        background: #45a049;
-    }
-    
-    .primary-button:disabled {
-        background: #cccccc;
-        cursor: not-allowed;
-    }
-    
-    /* League indicator in game UI */
-    .league-indicator {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        font-weight: bold;
-    }
-    
-    .league-indicator img {
-        height: 20px;
-        margin-right: 8px;
-    }
-`;
-document.head.appendChild(styleElement);
-
-// Update the createUI function to include league indicator
-function createUI() {
-    console.log('Creating UI elements...');
-    
-    // Create controls
-    const controls = document.createElement('div');
-    controls.id = 'controls';
-    
-    // Add league indicator
-    const leagueIndicator = document.createElement('div');
-    leagueIndicator.className = 'league-indicator';
-    leagueIndicator.innerHTML = `
-        <img id="leagueIcon" src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png" alt="League">
-        <span id="leagueText">Premier League</span>
-    `;
-    controls.appendChild(leagueIndicator);
-    
-    // Score display
-    const scoreContainer = document.createElement('div');
-    scoreContainer.innerHTML = `
-        <div>Score: <span id="score">0</span></div>
-        <div>Time: <span id="timer">60</span>s</div>
-        <div>Target: <span id="target-stadium">Select a league to start</span></div>
-    `;
-    controls.appendChild(scoreContainer);
-    
-    // Game buttons
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'button-container';
-    buttonContainer.innerHTML = `
-        <button id="start-game-btn">Start Game</button>
-        <button id="toggle-league-btn">Change League</button>
-        <button id="help-btn">Help</button>
-    `;
-    controls.appendChild(buttonContainer);
-    
-    // Add the controls to the page
-    document.body.appendChild(controls);
-    
-    // Distance indicator
-    const distanceIndicator = document.createElement('div');
-    distanceIndicator.id = 'distance-indicator';
-    distanceIndicator.style.display = 'none';
-    document.body.appendChild(distanceIndicator);
-    
-    // Target arrow
-    const targetArrow = document.createElement('div');
-    targetArrow.id = 'target-arrow';
-    targetArrow.style.display = 'none';
-    document.body.appendChild(targetArrow);
-    
-    // Compass
-    const compass = document.createElement('div');
-    compass.id = 'compass';
-    compass.innerHTML = `
-        <div class="compass-inner">
-            <div class="compass-arrow"></div>
-            <div class="compass-n">N</div>
-            <div class="compass-e">E</div>
-            <div class="compass-s">S</div>
-            <div class="compass-w">W</div>
-        </div>
-    `;
-    compass.style.display = 'none';
-    document.body.appendChild(compass);
-    
-    console.log('UI elements created');
-    
-    // Add event listener to toggle league button
-    const toggleLeagueBtn = document.getElementById('toggle-league-btn');
-    if (toggleLeagueBtn) {
-        toggleLeagueBtn.addEventListener('click', function() {
-            // Show the league selection modal
-            const leagueModal = document.getElementById('leagueSelectionModal');
-            if (leagueModal) {
-                leagueModal.style.display = 'block';
-            } else {
-                console.error('League selection modal not found!');
-            }
-        });
-    }
-}
-
-// Initialize the game once the page has loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM content loaded, initializing game...');
-    
-    // Debug mode flag
-    window.debugMode = true;
-    
-    // Initialize Firebase
-    initializeFirebase();
-    
-    // Create UI elements
-    createUI();
-    
-    // Create league selection modal
-    const leagueModal = createLeagueSelectionModal();
-    
-    // Create the map
-    map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/satellite-streets-v12',
-        center: [-0.1278, 51.5074], // London
-        zoom: 10
-    });
-    
-    // Wait for the map to load before adding interactivity
-    map.on('load', function() {
-        console.log('Map loaded, setting up interactivity...');
-        
-        // Add player marker to map
-        playerMarker = new mapboxgl.Marker({
-            color: '#ff0000',
-            draggable: false
-        }).setLngLat([0, 0]);
-        playerMarker.addTo(map);
-        
-        // Add event listener to map for player movement
-        map.on('click', function(e) {
-            if (gameActive) {
-                playerPosition = { lng: e.lngLat.lng, lat: e.lngLat.lat };
-                playerMarker.setLngLat([playerPosition.lng, playerPosition.lat]);
-            }
-        });
-        
-        // Setup Start Game button event
-        const startGameBtn = document.getElementById('start-game-btn');
-        if (startGameBtn) {
-            console.log('Setting up start game button...');
-            startGameBtn.addEventListener('click', function() {
-                console.log('Start Game button clicked');
-                // Show league selection before starting
-                leagueModal.style.display = 'block';
-            });
-        } else {
-            console.error('Start game button not found!');
-        }
-        
-        // Setup Help button event
-        const helpBtn = document.getElementById('help-btn');
-        if (helpBtn) {
-            helpBtn.addEventListener('click', function() {
-                // Show help/instructions
-                alert('Click anywhere on the map to move your player. Try to find the target stadium!');
-            });
-        }
-        
-        console.log('Game setup complete, ready to play!');
-    });
-});
