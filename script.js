@@ -1,8 +1,11 @@
 // Make sure to replace this with your actual Mapbox token!
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmthc2lvIiwiYSI6ImNtOHlmeTkwMTAwdTUya3I2MnFucGgwd3EifQ.MNPxypdXbr336CwI09nEmg';
 
-// Stadium Data - keep the original stadiumsData array
-const stadiumsData = [
+// Track current selected league
+let currentLeague = 'premier'; // 'premier' or 'laliga'
+
+// Premier League Stadium Data
+const premierLeagueStadiums = [
     // Premier League 2024/2025 Season Stadiums
     {
         id: 'emirates_stadium',
@@ -26,7 +29,9 @@ const stadiumsData = [
         recordAttendance: 60383,
         surface: 'GrassMaster (hybrid grass)',
         architect: 'Populous',
-        cost: '£390 million'
+        cost: '£390 million',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'villa_park',
@@ -50,7 +55,9 @@ const stadiumsData = [
         recordAttendance: 76588, // Note: Old record before seating changes
         surface: 'Desso GrassMaster (hybrid grass)',
         architect: 'Archibald Leitch (main stands)',
-        cost: 'N/A (Historic ground)'
+        cost: 'N/A (Historic ground)',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'vitality_stadium',
@@ -70,7 +77,9 @@ const stadiumsData = [
         recordAttendance: 28799, // Note: Old record before seating changes
         surface: 'Grass',
         architect: 'N/A (Rebuilt)',
-        cost: 'N/A (Rebuilt)'
+        cost: 'N/A (Rebuilt)',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'gtech_community_stadium',
@@ -84,7 +93,9 @@ const stadiumsData = [
         description: 'Home of Brentford F.C.',
         yearBuilt: 2020,
         homeTeams: ['Brentford'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Brentford_Community_Stadium_2021.jpg/640px-Brentford_Community_Stadium_2021.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Brentford_Community_Stadium_2021.jpg/640px-Brentford_Community_Stadium_2021.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'amex_stadium',
@@ -98,7 +109,9 @@ const stadiumsData = [
         description: 'Home of Brighton & Hove Albion F.C.',
         yearBuilt: 2011,
         homeTeams: ['Brighton & Hove Albion'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Falmer_Stadium_aerial_view.jpg/640px-Falmer_Stadium_aerial_view.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Falmer_Stadium_aerial_view.jpg/640px-Falmer_Stadium_aerial_view.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'stamford_bridge',
@@ -112,7 +125,9 @@ const stadiumsData = [
         description: 'Home of Chelsea F.C.',
         yearBuilt: 1877, // Opened
         homeTeams: ['Chelsea'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Stamford_Bridge_Clear_Skies.JPG/640px-Stamford_Bridge_Clear_Skies.JPG'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Stamford_Bridge_Clear_Skies.JPG/640px-Stamford_Bridge_Clear_Skies.JPG',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'selhurst_park',
@@ -126,7 +141,9 @@ const stadiumsData = [
         description: 'Home of Crystal Palace F.C.',
         yearBuilt: 1924,
         homeTeams: ['Crystal Palace'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Selhurst_Park_main_stand_and_corporate_boxes.jpg/640px-Selhurst_Park_main_stand_and_corporate_boxes.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Selhurst_Park_main_stand_and_corporate_boxes.jpg/640px-Selhurst_Park_main_stand_and_corporate_boxes.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'goodison_park',
@@ -140,7 +157,9 @@ const stadiumsData = [
         description: 'Home of Everton F.C.',
         yearBuilt: 1892,
         homeTeams: ['Everton'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Goodison_Park_stands_2015.jpg/640px-Goodison_Park_stands_2015.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Goodison_Park_stands_2015.jpg/640px-Goodison_Park_stands_2015.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'craven_cottage',
@@ -154,7 +173,9 @@ const stadiumsData = [
         description: 'Home of Fulham F.C.',
         yearBuilt: 1896,
         homeTeams: ['Fulham'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Craven_Cottage_March_2006.jpg/640px-Craven_Cottage_March_2006.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Craven_Cottage_March_2006.jpg/640px-Craven_Cottage_March_2006.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'portman_road',
@@ -168,7 +189,9 @@ const stadiumsData = [
         description: 'Home of Ipswich Town F.C.',
         yearBuilt: 1884, // Ground established
         homeTeams: ['Ipswich Town'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Portman_Road_From_West_Stand.jpg/640px-Portman_Road_From_West_Stand.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Portman_Road_From_West_Stand.jpg/640px-Portman_Road_From_West_Stand.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'king_power_stadium',
@@ -182,7 +205,9 @@ const stadiumsData = [
         description: 'Home of Leicester City F.C.',
         yearBuilt: 2002,
         homeTeams: ['Leicester City'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/King_Power_Stadium_Aerial_View_%28cropped%29.jpg/640px-King_Power_Stadium_Aerial_View_%28cropped%29.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/King_Power_Stadium_Aerial_View_%28cropped%29.jpg/640px-King_Power_Stadium_Aerial_View_%28cropped%29.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'anfield',
@@ -196,7 +221,9 @@ const stadiumsData = [
         description: 'Home of Liverpool F.C.',
         yearBuilt: 1884, // Ground established
         homeTeams: ['Liverpool'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg/640px-Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg/640px-Panorama_of_Anfield_with_new_main_stand_%2829676137814%29.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'etihad_stadium',
@@ -210,7 +237,9 @@ const stadiumsData = [
         description: 'Home of Manchester City F.C.',
         yearBuilt: 2002,
         homeTeams: ['Manchester City'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Etihad_Stadium.jpg/640px-Etihad_Stadium.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Etihad_Stadium.jpg/640px-Etihad_Stadium.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'old_trafford',
@@ -224,7 +253,9 @@ const stadiumsData = [
         description: 'Home of Manchester United F.C.',
         yearBuilt: 1910,
         homeTeams: ['Manchester United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Old_Trafford_inside_20060726_1.jpg/640px-Old_Trafford_inside_20060726_1.jpg' 
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Old_Trafford_inside_20060726_1.jpg/640px-Old_Trafford_inside_20060726_1.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'st_james_park',
@@ -238,7 +269,9 @@ const stadiumsData = [
         description: 'Home of Newcastle United F.C.',
         yearBuilt: 1892, // Ground used since 1880
         homeTeams: ['Newcastle United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/St_James%27_Park_aerial_view.jpg/640px-St_James%27_Park_aerial_view.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/St_James%27_Park_aerial_view.jpg/640px-St_James%27_Park_aerial_view.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'city_ground',
@@ -252,7 +285,9 @@ const stadiumsData = [
         description: 'Home of Nottingham Forest F.C.',
         yearBuilt: 1898,
         homeTeams: ['Nottingham Forest'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Citygroundfromriver.jpg/640px-Citygroundfromriver.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Citygroundfromriver.jpg/640px-Citygroundfromriver.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'st_marys_stadium',
@@ -266,7 +301,9 @@ const stadiumsData = [
         description: 'Home of Southampton F.C.',
         yearBuilt: 2001,
         homeTeams: ['Southampton'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/St._Mary%27s_Stadium_-_panoramio_%285%29.jpg/640px-St._Mary%27s_Stadium_-_panoramio_%285%29.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/St._Mary%27s_Stadium_-_panoramio_%285%29.jpg/640px-St._Mary%27s_Stadium_-_panoramio_%285%29.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'tottenham_hotspur_stadium',
@@ -280,7 +317,9 @@ const stadiumsData = [
         description: 'Home of Tottenham Hotspur F.C.',
         yearBuilt: 2019,
         homeTeams: ['Tottenham Hotspur'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Tottenham_Hotspur_Stadium_external_April_2019.jpg/640px-Tottenham_Hotspur_Stadium_external_April_2019.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Tottenham_Hotspur_Stadium_external_April_2019.jpg/640px-Tottenham_Hotspur_Stadium_external_April_2019.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'london_stadium',
@@ -294,7 +333,9 @@ const stadiumsData = [
         description: 'Home of West Ham United F.C.',
         yearBuilt: 2011, // Built for Olympics
         homeTeams: ['West Ham United'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/London_Stadium_June_2017.jpg/640px-London_Stadium_June_2017.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/London_Stadium_June_2017.jpg/640px-London_Stadium_June_2017.jpg',
+        country: 'England',
+        league: 'Premier League'
     },
     {
         id: 'molineux_stadium',
@@ -308,9 +349,238 @@ const stadiumsData = [
         description: 'Home of Wolverhampton Wanderers F.C.',
         yearBuilt: 1889,
         homeTeams: ['Wolverhampton Wanderers'],
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg/640px-Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg'
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg/640px-Molineux_Stadium_-_Wolverhampton_Wanderers_FC.jpg',
+        country: 'England',
+        league: 'Premier League'
     }
 ];
+
+// Spanish La Liga Stadium Data
+const laLigaStadiums = [
+    {
+        id: 'santiago_bernabeu',
+        name: 'Santiago Bernabéu',
+        lng: -3.6883,
+        lat: 40.4531,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 60,
+        color: 0xFFFFFF, // Real Madrid White
+        description: 'Home of Real Madrid C.F.',
+        yearBuilt: 1947,
+        homeTeams: ['Real Madrid'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Panoramic_santiago_bernabeu.jpg/640px-Panoramic_santiago_bernabeu.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/320px-Real_Madrid_CF.svg.png',
+        capacity: 81044,
+        recordAttendance: 129690,
+        surface: 'Hybrid grass',
+        architect: 'Manuel Muñoz Monasterio, Luis Alemany Soler',
+        cost: 'Renovated for €575 million (2019–2023)',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'camp_nou',
+        name: 'Camp Nou',
+        lng: 2.1228,
+        lat: 41.3809,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 65,
+        color: 0xA50044, // Barcelona Garnet
+        description: 'Home of FC Barcelona',
+        yearBuilt: 1957,
+        homeTeams: ['FC Barcelona'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Camp_Nou_aerial_%28cropped%29.jpg/640px-Camp_Nou_aerial_%28cropped%29.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/320px-FC_Barcelona_%28crest%29.svg.png',
+        capacity: 99354,
+        recordAttendance: 120000,
+        surface: 'Hybrid grass',
+        architect: 'Francesc Mitjans, Josep Soteras',
+        cost: '€1.73 billion (renovation)',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'wanda_metropolitano',
+        name: 'Metropolitano',
+        lng: -3.5986,
+        lat: 40.4362,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 55,
+        color: 0xCB3234, // Atletico Red
+        description: 'Home of Atlético Madrid',
+        yearBuilt: 2017,
+        homeTeams: ['Atlético Madrid'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Wanda_Metropolitano_%28cropped%29.jpg/640px-Wanda_Metropolitano_%28cropped%29.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_Madrid_2017_logo.svg/320px-Atletico_Madrid_2017_logo.svg.png',
+        capacity: 68456,
+        recordAttendance: 68044,
+        surface: 'Hybrid grass',
+        architect: 'Cruz y Ortiz',
+        cost: '€240 million',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'sanchez_pizjuan',
+        name: 'Ramón Sánchez Pizjuán',
+        lng: -5.9702,
+        lat: 37.3839,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 50,
+        color: 0xE31E24, // Sevilla Red
+        description: 'Home of Sevilla FC',
+        yearBuilt: 1958,
+        homeTeams: ['Sevilla FC'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/SanchezPizjuan.jpg/640px-SanchezPizjuan.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/Sevilla_FC_logo.svg/320px-Sevilla_FC_logo.svg.png',
+        capacity: 43883,
+        recordAttendance: 70200,
+        surface: 'Grass',
+        architect: 'Manuel Muñoz Monasterio',
+        cost: 'N/A',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'mestalla',
+        name: 'Mestalla',
+        lng: -0.3581,
+        lat: 39.4747,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 50,
+        color: 0xF68A00, // Valencia Orange
+        description: 'Home of Valencia CF',
+        yearBuilt: 1923,
+        homeTeams: ['Valencia CF'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Mestalla_Stadium_2011.jpg/640px-Mestalla_Stadium_2011.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/ce/Valenciacf.svg/320px-Valenciacf.svg.png',
+        capacity: 49430,
+        recordAttendance: 56500,
+        surface: 'Grass',
+        architect: 'N/A',
+        cost: 'N/A',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'reale_arena',
+        name: 'Reale Arena',
+        lng: -1.9731,
+        lat: 43.3013,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 50,
+        color: 0x0000FF, // Real Sociedad Blue
+        description: 'Home of Real Sociedad',
+        yearBuilt: 1993,
+        homeTeams: ['Real Sociedad'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Donostia-San_Sebasti%C3%A1n_Reale_Arena_Stadium_%28Anoeta%29_%288-2018%29.jpg/640px-Donostia-San_Sebasti%C3%A1n_Reale_Arena_Stadium_%28Anoeta%29_%288-2018%29.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Real_Sociedad_logo.svg/320px-Real_Sociedad_logo.svg.png',
+        capacity: 39500,
+        recordAttendance: 32076,
+        surface: 'Grass',
+        architect: 'Iñaki Barron',
+        cost: '€33 million',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'san_mames',
+        name: 'San Mamés',
+        lng: -2.9425,
+        lat: 43.2641,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 50,
+        color: 0xFF0000, // Athletic Bilbao Red
+        description: 'Home of Athletic Bilbao',
+        yearBuilt: 2013,
+        homeTeams: ['Athletic Bilbao'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/San_Mames_Stadium_%28crop%29.jpg/640px-San_Mames_Stadium_%28crop%29.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Athletic_Club_Bilbao_logo.svg/320px-Athletic_Club_Bilbao_logo.svg.png',
+        capacity: 53331,
+        recordAttendance: 53289,
+        surface: 'Grass',
+        architect: 'César Azcárate',
+        cost: '€211 million',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'benito_villamarin',
+        name: 'Benito Villamarín',
+        lng: -5.9816,
+        lat: 37.3565,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 50,
+        color: 0x00954C, // Real Betis Green
+        description: 'Home of Real Betis',
+        yearBuilt: 1929,
+        homeTeams: ['Real Betis'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Estadio_Benito_Villamarin_2020.jpg/640px-Estadio_Benito_Villamarin_2020.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Real_betis_logo.svg/320px-Real_betis_logo.svg.png',
+        capacity: 60720,
+        recordAttendance: 60720,
+        surface: 'Grass',
+        architect: 'Antonio González Cordón',
+        cost: 'N/A',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'coliseum',
+        name: 'Coliseum Alfonso Pérez',
+        lng: -3.7429,
+        lat: 40.3252,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 45,
+        color: 0x005999, // Getafe Blue
+        description: 'Home of Getafe CF',
+        yearBuilt: 1998,
+        homeTeams: ['Getafe CF'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Coliseum_Alfonso_P%C3%A9rez_%28Getafe%29_02.jpg/640px-Coliseum_Alfonso_P%C3%A9rez_%28Getafe%29_02.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Getafe_logo.svg/320px-Getafe_logo.svg.png',
+        capacity: 17393,
+        recordAttendance: 16300,
+        surface: 'Grass',
+        architect: 'N/A',
+        cost: 'N/A',
+        country: 'Spain',
+        league: 'La Liga'
+    },
+    {
+        id: 'mallorca_son_moix',
+        name: 'Mallorca Son Moix',
+        lng: 2.6334,
+        lat: 39.5913,
+        altitude: 0,
+        modelPath: 'cylinder',
+        scale: 45,
+        color: 0xFF0000, // Mallorca Red
+        description: 'Home of RCD Mallorca',
+        yearBuilt: 1999,
+        homeTeams: ['RCD Mallorca'],
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/EstadioSonMoix.jpg/640px-EstadioSonMoix.jpg',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/RCD_Mallorca_logo.svg/320px-RCD_Mallorca_logo.svg.png',
+        capacity: 23142,
+        recordAttendance: 23142,
+        surface: 'Grass',
+        architect: 'N/A',
+        cost: 'N/A',
+        country: 'Spain',
+        league: 'La Liga'
+    }
+];
+
+// Active stadiums data - this will be set based on league selection
+let stadiumsData = premierLeagueStadiums;
 
 // Game state variables
 let gameActive = false;
@@ -2314,3 +2584,302 @@ function verifyFirebaseAnalytics() {
 
 // Make the verify function globally available
 window.verifyFirebaseAnalytics = verifyFirebaseAnalytics;
+
+// Function to create the league selection modal
+function createLeagueSelectionModal() {
+    const modal = document.createElement('div');
+    modal.id = 'leagueSelectionModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Select a League</h2>
+            <p>Choose which league's stadiums you want to find:</p>
+            <div class="league-options">
+                <div class="league-option" data-league="premier">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png" alt="Premier League">
+                    <h3>Premier League</h3>
+                    <p>${premierLeagueStadiums.length} stadiums</p>
+                </div>
+                <div class="league-option" data-league="laliga">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png" alt="La Liga">
+                    <h3>La Liga</h3>
+                    <p>${laLigaStadiums.length} stadiums</p>
+                </div>
+            </div>
+            <button id="startWithSelectedLeague" class="primary-button" disabled>Start Game</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Add event listeners for league selection
+    const leagueOptions = document.querySelectorAll('.league-option');
+    const startButton = document.getElementById('startWithSelectedLeague');
+    
+    leagueOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Remove selected class from all options
+            leagueOptions.forEach(opt => opt.classList.remove('selected'));
+            // Add selected class to the clicked option
+            option.classList.add('selected');
+            // Enable the start button
+            startButton.disabled = false;
+        });
+    });
+
+    // Start game with selected league
+    startButton.addEventListener('click', () => {
+        const selectedLeague = document.querySelector('.league-option.selected').dataset.league;
+        selectLeague(selectedLeague);
+        modal.style.display = 'none';
+        startGame();
+    });
+
+    return modal;
+}
+
+// Function to handle league selection
+function selectLeague(league) {
+    currentLeague = league;
+    
+    // Update active stadiums based on selection
+    if (league === 'premier') {
+        stadiumsData = premierLeagueStadiums;
+        document.getElementById('leagueIcon').src = 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png';
+        document.getElementById('leagueText').textContent = 'Premier League';
+    } else if (league === 'laliga') {
+        stadiumsData = laLigaStadiums;
+        document.getElementById('leagueIcon').src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png';
+        document.getElementById('leagueText').textContent = 'La Liga';
+    }
+
+    // Log analytics event for league selection
+    if (analyticsAvailable()) {
+        logEvent(analytics, 'league_selected', {
+            league_name: league === 'premier' ? 'Premier League' : 'La Liga',
+            stadium_count: stadiumsData.length
+        });
+    }
+}
+
+// Update startGame function to accommodate league selection
+function startGame(mode = 'singleplayer') {
+    // ... existing startGame code ...
+
+    // Add this at the beginning of the function
+    if (!gameStarted) {
+        // Set appropriate stadium data based on current league
+        if (currentLeague === 'premier') {
+            stadiumsData = premierLeagueStadiums;
+        } else if (currentLeague === 'laliga') {
+            stadiumsData = laLigaStadiums;
+        }
+    }
+
+    // Continue with rest of startGame function
+    // ... existing code ...
+}
+
+// Add the CSS for league selection to the existing style element
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+    /* Existing CSS styles */
+    body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #controls { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 4px; max-width: 300px; }
+    #leaderboard { position: absolute; top: 10px; right: 10px; z-index: 1; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 4px; max-width: 300px; display: none; }
+    #leaderboard h3 { margin-top: 0; }
+    .stadium-card { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 2; max-width: 400px; display: none; }
+    .stadium-card h2 { margin-top: 0; }
+    .stadium-card img { width: 100%; height: auto; border-radius: 4px; margin-bottom: 10px; }
+    .stadium-card button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    .stadium-card button:hover { background: #45a049; }
+    .score-input { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 3; display: none; text-align: center; }
+    .score-input input { padding: 8px; margin: 10px 0; width: 100%; box-sizing: border-box; }
+    .score-input button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
+    .score-input button:hover { background: #45a049; }
+    .score-input .cancel { background: #f44336; }
+    .score-input .cancel:hover { background: #d32f2f; }
+    
+    /* League Selection Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+    }
+    
+    .modal-content {
+        position: relative;
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 600px;
+        text-align: center;
+    }
+    
+    .league-options {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+    
+    .league-option {
+        background-color: #f9f9f9;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        width: 40%;
+        min-width: 200px;
+        margin: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .league-option:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .league-option.selected {
+        border-color: #4CAF50;
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+    
+    .league-option img {
+        max-width: 100px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+    
+    .primary-button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .primary-button:hover {
+        background: #45a049;
+    }
+    
+    .primary-button:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+    }
+    
+    /* League indicator in game UI */
+    .league-indicator {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    
+    .league-indicator img {
+        height: 20px;
+        margin-right: 8px;
+    }
+`;
+document.head.appendChild(styleElement);
+
+// Update the createUI function to include league indicator
+function createUI() {
+    // Create controls
+    const controls = document.createElement('div');
+    controls.id = 'controls';
+    
+    // Add league indicator
+    const leagueIndicator = document.createElement('div');
+    leagueIndicator.className = 'league-indicator';
+    leagueIndicator.innerHTML = `
+        <img id="leagueIcon" src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png" alt="League">
+        <span id="leagueText">Premier League</span>
+    `;
+    controls.appendChild(leagueIndicator);
+
+    // Rest of the createUI function
+    // ... existing code ...
+}
+
+// Initialize the game once the page has loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Firebase
+    initializeFirebase();
+    
+    // Create UI elements
+    createUI();
+    
+    // Create league selection modal
+    const leagueModal = createLeagueSelectionModal();
+    
+    // Create the map
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        center: [-0.1278, 51.5074], // London
+        zoom: 10
+    });
+    
+    // Wait for the map to load before adding interactivity
+    map.on('load', function() {
+        // Get the home screen elements
+        const homeScreen = document.getElementById('home-screen');
+        const singleplayerBtn = document.getElementById('singleplayer-btn');
+        const multiplayerBtn = document.getElementById('multiplayer-btn');
+        const createGameBtn = document.getElementById('create-game-btn');
+        const joinGameBtn = document.getElementById('join-game-btn');
+        
+        // Add event listeners for game mode buttons
+        singleplayerBtn.addEventListener('click', function() {
+            homeScreen.style.display = 'none';
+            leagueModal.style.display = 'block';
+            gameMode = 'singleplayer';
+        });
+        
+        multiplayerBtn.addEventListener('click', function() {
+            homeScreen.style.display = 'none';
+            document.getElementById('multiplayer-options').style.display = 'flex';
+        });
+        
+        createGameBtn.addEventListener('click', function() {
+            document.getElementById('multiplayer-options').style.display = 'none';
+            leagueModal.style.display = 'block';
+            gameMode = 'host';
+        });
+        
+        joinGameBtn.addEventListener('click', function() {
+            document.getElementById('multiplayer-options').style.display = 'none';
+            document.getElementById('join-game-screen').style.display = 'flex';
+            gameMode = 'guest';
+        });
+        
+        // For multiplayer game joining
+        document.getElementById('join-game-submit').addEventListener('click', function() {
+            const gameCode = document.getElementById('game-code-input').value.trim();
+            const nickname = document.getElementById('nickname-input').value.trim();
+            
+            if (!gameCode || !nickname) {
+                alert('Please enter both a game code and nickname.');
+                return;
+            }
+            
+            joinGameRoom(gameCode, nickname);
+        });
+        
+        // Show home screen
+        homeScreen.style.display = 'flex';
+        
+        // Initialize the buy me a coffee button functionality
+        updateBuyMeCoffeeVisibility();
+    });
+});
