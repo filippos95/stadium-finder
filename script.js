@@ -1199,37 +1199,51 @@ function initializeGame() {
     }, 500);
 }
 
-function startGame(isMultiplayer = false) {
+function startGame(mode = 'singleplayer') {
     // Reset game state
     gameActive = true;
     score = 0;
     timer = 60;
     foundStadiums = [];
     
+    // Set appropriate stadium data based on current league
+    if (currentLeague === 'premier') {
+        stadiumsData = premierLeagueStadiums;
+    } else if (currentLeague === 'laliga') {
+        stadiumsData = laLigaStadiums;
+    }
+    
     // Set multiplayer mode if specified
-    isMultiplayerMode = isMultiplayer;
+    isMultiplayerMode = (mode === 'multiplayer');
     
     // Start in exploration mode
     explorationMode = true;
     
     // Update UI
-    scoreElement.textContent = score;
-    timerElement.textContent = timer;
-    startGameBtn.textContent = 'Restart Game';
+    document.getElementById('score').textContent = score;
+    document.getElementById('timer').textContent = timer;
+    document.getElementById('start-game-btn').textContent = 'Restart Game';
     
-    // Place player at random location in the UK
-    // UK bounds: roughly between -10 to 2 longitude and 50 to 59 latitude
-    const randomLng = -5 + Math.random() * 7; // From -5 to 2
-    const randomLat = 50 + Math.random() * 9; // From 50 to 59
+    // Place player at random location in the appropriate region based on league
+    let randomLng, randomLat;
+    if (currentLeague === 'premier') {
+        // UK bounds: roughly between -10 to 2 longitude and 50 to 59 latitude
+        randomLng = -5 + Math.random() * 7; // From -5 to 2
+        randomLat = 50 + Math.random() * 9; // From 50 to 59
+    } else if (currentLeague === 'laliga') {
+        // Spain bounds: roughly between -9 to 3 longitude and 36 to 43 latitude
+        randomLng = -7 + Math.random() * 10; // From -7 to 3
+        randomLat = 36 + Math.random() * 7; // From 36 to 43
+    }
     
     playerPosition = { lng: randomLng, lat: randomLat };
     
-    // Select random stadium as target instead of nearest
+    // Select random stadium as target
     const availableStadiums = stadiumsData.filter(stadium => !foundStadiums.includes(stadium.id));
     if (availableStadiums.length > 0) {
         const randomIndex = Math.floor(Math.random() * availableStadiums.length);
         targetStadium = availableStadiums[randomIndex];
-        targetStadiumElement.textContent = 'Target: ' + targetStadium.name;
+        document.getElementById('target-stadium').textContent = 'Target: ' + targetStadium.name;
     } else {
         endGame(true);
         return;
@@ -1258,7 +1272,7 @@ function startGame(isMultiplayer = false) {
     map.doubleClickZoom.enable();
     
     // Hide stadium markers on minimap in exploration mode
-    toggleMinimapMarkers(hideMinimapStadiums);
+    toggleMinimapMarkers(true);
     
     // Start game loop
     startGameLoop();
@@ -1267,14 +1281,14 @@ function startGame(isMultiplayer = false) {
     startTimer();
     
     // Show distance indicator
-    distanceIndicatorElement.style.display = 'block';
-    distanceIndicatorElement.textContent = `Click anywhere to move. Find ${targetStadium.name} with no markers!`;
+    document.getElementById('distance-indicator').style.display = 'block';
+    document.getElementById('distance-indicator').textContent = `Click anywhere to move. Find ${targetStadium.name} with no markers!`;
     
     // Hide target arrow in exploration mode
-    targetArrow.style.display = 'none';
+    document.getElementById('target-arrow').style.display = 'none';
     
     // Show compass
-    compass.style.display = 'block';
+    document.getElementById('compass').style.display = 'block';
     
     // If multiplayer, initialize player stats
     if (isMultiplayerMode) {
@@ -1285,10 +1299,13 @@ function startGame(isMultiplayer = false) {
     updateBuyMeCoffeeVisibility();
     
     // Log game_start event
-    logAnalyticsEvent('game_start', {
-        multiplayer_mode: isMultiplayer,
-        exploration_mode: explorationMode
-    });
+    if (analyticsAvailable()) {
+        logEvent(analytics, 'game_start', {
+            multiplayer_mode: isMultiplayerMode,
+            exploration_mode: explorationMode,
+            selected_league: currentLeague
+        });
+    }
 }
 
 function updateTargetStadium() {
@@ -2352,7 +2369,7 @@ identifyStadium = function() {
         // Log stadium_found event
         logAnalyticsEvent('stadium_found', {
             stadium_name: stadiumNameBefore,
-            distance_km: distance.toFixed(3),
+            distance_km: distance?.toFixed(3) || 'N/A',
             exploration_mode: explorationMode,
             stadiums_found_count: foundStadiums.length,
             current_score: score,
@@ -2590,6 +2607,7 @@ function createLeagueSelectionModal() {
     const modal = document.createElement('div');
     modal.id = 'leagueSelectionModal';
     modal.className = 'modal';
+    modal.style.display = 'none'; // Start hidden, will be shown when needed
     modal.innerHTML = `
         <div class="modal-content">
             <h2>Select a League</h2>
@@ -2617,6 +2635,7 @@ function createLeagueSelectionModal() {
     
     leagueOptions.forEach(option => {
         option.addEventListener('click', () => {
+            console.log('League option clicked:', option.dataset.league);
             // Remove selected class from all options
             leagueOptions.forEach(opt => opt.classList.remove('selected'));
             // Add selected class to the clicked option
@@ -2628,29 +2647,56 @@ function createLeagueSelectionModal() {
 
     // Start game with selected league
     startButton.addEventListener('click', () => {
+        console.log('Start button clicked');
         const selectedLeague = document.querySelector('.league-option.selected').dataset.league;
+        console.log('Selected league:', selectedLeague);
         selectLeague(selectedLeague);
         modal.style.display = 'none';
         startGame();
     });
 
+    console.log('League selection modal created');
     return modal;
 }
 
 // Function to handle league selection
 function selectLeague(league) {
+    console.log(`Selecting league: ${league}`);
     currentLeague = league;
     
+    console.log(`Setting stadiumsData to ${league === 'premier' ? 'premierLeagueStadiums' : 'laLigaStadiums'}`);
     // Update active stadiums based on selection
     if (league === 'premier') {
         stadiumsData = premierLeagueStadiums;
-        document.getElementById('leagueIcon').src = 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png';
-        document.getElementById('leagueText').textContent = 'Premier League';
+        
+        // Try to update the league indicator if it exists
+        const leagueIcon = document.getElementById('leagueIcon');
+        const leagueText = document.getElementById('leagueText');
+        
+        if (leagueIcon) {
+            leagueIcon.src = 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/300px-Premier_League_Logo.svg.png';
+        }
+        
+        if (leagueText) {
+            leagueText.textContent = 'Premier League';
+        }
     } else if (league === 'laliga') {
         stadiumsData = laLigaStadiums;
-        document.getElementById('leagueIcon').src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png';
-        document.getElementById('leagueText').textContent = 'La Liga';
+        
+        // Try to update the league indicator if it exists
+        const leagueIcon = document.getElementById('leagueIcon');
+        const leagueText = document.getElementById('leagueText');
+        
+        if (leagueIcon) {
+            leagueIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/300px-LaLiga.svg.png';
+        }
+        
+        if (leagueText) {
+            leagueText.textContent = 'La Liga';
+        }
     }
+    
+    console.log(`stadiumsData now has ${stadiumsData.length} stadiums`);
 
     // Log analytics event for league selection
     if (analyticsAvailable()) {
@@ -2794,6 +2840,8 @@ document.head.appendChild(styleElement);
 
 // Update the createUI function to include league indicator
 function createUI() {
+    console.log('Creating UI elements...');
+    
     // Create controls
     const controls = document.createElement('div');
     controls.id = 'controls';
@@ -2806,13 +2854,80 @@ function createUI() {
         <span id="leagueText">Premier League</span>
     `;
     controls.appendChild(leagueIndicator);
-
-    // Rest of the createUI function
-    // ... existing code ...
+    
+    // Score display
+    const scoreContainer = document.createElement('div');
+    scoreContainer.innerHTML = `
+        <div>Score: <span id="score">0</span></div>
+        <div>Time: <span id="timer">60</span>s</div>
+        <div>Target: <span id="target-stadium">Select a league to start</span></div>
+    `;
+    controls.appendChild(scoreContainer);
+    
+    // Game buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+    buttonContainer.innerHTML = `
+        <button id="start-game-btn">Start Game</button>
+        <button id="toggle-league-btn">Change League</button>
+        <button id="help-btn">Help</button>
+    `;
+    controls.appendChild(buttonContainer);
+    
+    // Add the controls to the page
+    document.body.appendChild(controls);
+    
+    // Distance indicator
+    const distanceIndicator = document.createElement('div');
+    distanceIndicator.id = 'distance-indicator';
+    distanceIndicator.style.display = 'none';
+    document.body.appendChild(distanceIndicator);
+    
+    // Target arrow
+    const targetArrow = document.createElement('div');
+    targetArrow.id = 'target-arrow';
+    targetArrow.style.display = 'none';
+    document.body.appendChild(targetArrow);
+    
+    // Compass
+    const compass = document.createElement('div');
+    compass.id = 'compass';
+    compass.innerHTML = `
+        <div class="compass-inner">
+            <div class="compass-arrow"></div>
+            <div class="compass-n">N</div>
+            <div class="compass-e">E</div>
+            <div class="compass-s">S</div>
+            <div class="compass-w">W</div>
+        </div>
+    `;
+    compass.style.display = 'none';
+    document.body.appendChild(compass);
+    
+    console.log('UI elements created');
+    
+    // Add event listener to toggle league button
+    const toggleLeagueBtn = document.getElementById('toggle-league-btn');
+    if (toggleLeagueBtn) {
+        toggleLeagueBtn.addEventListener('click', function() {
+            // Show the league selection modal
+            const leagueModal = document.getElementById('leagueSelectionModal');
+            if (leagueModal) {
+                leagueModal.style.display = 'block';
+            } else {
+                console.error('League selection modal not found!');
+            }
+        });
+    }
 }
 
 // Initialize the game once the page has loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM content loaded, initializing game...');
+    
+    // Debug mode flag
+    window.debugMode = true;
+    
     // Initialize Firebase
     initializeFirebase();
     
@@ -2832,54 +2947,45 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Wait for the map to load before adding interactivity
     map.on('load', function() {
-        // Get the home screen elements
-        const homeScreen = document.getElementById('home-screen');
-        const singleplayerBtn = document.getElementById('singleplayer-btn');
-        const multiplayerBtn = document.getElementById('multiplayer-btn');
-        const createGameBtn = document.getElementById('create-game-btn');
-        const joinGameBtn = document.getElementById('join-game-btn');
+        console.log('Map loaded, setting up interactivity...');
         
-        // Add event listeners for game mode buttons
-        singleplayerBtn.addEventListener('click', function() {
-            homeScreen.style.display = 'none';
-            leagueModal.style.display = 'block';
-            gameMode = 'singleplayer';
-        });
+        // Add player marker to map
+        playerMarker = new mapboxgl.Marker({
+            color: '#ff0000',
+            draggable: false
+        }).setLngLat([0, 0]);
+        playerMarker.addTo(map);
         
-        multiplayerBtn.addEventListener('click', function() {
-            homeScreen.style.display = 'none';
-            document.getElementById('multiplayer-options').style.display = 'flex';
-        });
-        
-        createGameBtn.addEventListener('click', function() {
-            document.getElementById('multiplayer-options').style.display = 'none';
-            leagueModal.style.display = 'block';
-            gameMode = 'host';
-        });
-        
-        joinGameBtn.addEventListener('click', function() {
-            document.getElementById('multiplayer-options').style.display = 'none';
-            document.getElementById('join-game-screen').style.display = 'flex';
-            gameMode = 'guest';
-        });
-        
-        // For multiplayer game joining
-        document.getElementById('join-game-submit').addEventListener('click', function() {
-            const gameCode = document.getElementById('game-code-input').value.trim();
-            const nickname = document.getElementById('nickname-input').value.trim();
-            
-            if (!gameCode || !nickname) {
-                alert('Please enter both a game code and nickname.');
-                return;
+        // Add event listener to map for player movement
+        map.on('click', function(e) {
+            if (gameActive) {
+                playerPosition = { lng: e.lngLat.lng, lat: e.lngLat.lat };
+                playerMarker.setLngLat([playerPosition.lng, playerPosition.lat]);
             }
-            
-            joinGameRoom(gameCode, nickname);
         });
         
-        // Show home screen
-        homeScreen.style.display = 'flex';
+        // Setup Start Game button event
+        const startGameBtn = document.getElementById('start-game-btn');
+        if (startGameBtn) {
+            console.log('Setting up start game button...');
+            startGameBtn.addEventListener('click', function() {
+                console.log('Start Game button clicked');
+                // Show league selection before starting
+                leagueModal.style.display = 'block';
+            });
+        } else {
+            console.error('Start game button not found!');
+        }
         
-        // Initialize the buy me a coffee button functionality
-        updateBuyMeCoffeeVisibility();
+        // Setup Help button event
+        const helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+            helpBtn.addEventListener('click', function() {
+                // Show help/instructions
+                alert('Click anywhere on the map to move your player. Try to find the target stadium!');
+            });
+        }
+        
+        console.log('Game setup complete, ready to play!');
     });
 });
