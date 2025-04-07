@@ -7,5 +7,6 @@ window.env = {
     FIREBASE_PROJECT_ID: "your-project-id",
     FIREBASE_STORAGE_BUCKET: "your-project-id.appspot.com",
     FIREBASE_MESSAGING_SENDER_ID: "your_messaging_id",
-    FIREBASE_APP_ID: "your_app_id"
+    FIREBASE_APP_ID: "your_app_id",
+    FIREBASE_MEASUREMENT_ID: "your_measurement_id" // For Firebase Analytics (format: G-XXXXXXXXXX)
 };

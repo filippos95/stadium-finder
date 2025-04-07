@@ -352,14 +352,16 @@ function initializeFirebase() {
             projectId: window.env?.FIREBASE_PROJECT_ID || "YOUR_PROJECT",
             storageBucket: window.env?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
             messagingSenderId: window.env?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_ID",
-            appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID"
+            appId: window.env?.FIREBASE_APP_ID || "YOUR_APP_ID",
+            measurementId: window.env?.FIREBASE_MEASUREMENT_ID || "YOUR_MEASUREMENT_ID"
         };
         
         console.log("Firebase config:", JSON.stringify({
             apiKey: firebaseConfig.apiKey ? "***" : "NOT SET",
             authDomain: firebaseConfig.authDomain,
             databaseURL: firebaseConfig.databaseURL,
-            projectId: firebaseConfig.projectId
+            projectId: firebaseConfig.projectId,
+            measurementId: firebaseConfig.measurementId ? "***" : "NOT SET"
         }));
         
         // Validate essential Firebase config
@@ -374,6 +376,18 @@ function initializeFirebase() {
         if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
             firebaseApp = firebase.initializeApp(firebaseConfig);
             firebaseDB = firebase.database();
+            
+            // Initialize Analytics
+            if (typeof firebase.analytics === 'function') {
+                window.firebaseAnalytics = firebase.analytics();
+                console.log("Firebase Analytics initialized");
+                
+                // Log app_open event
+                window.firebaseAnalytics.logEvent('app_open');
+            } else {
+                console.warn("Firebase Analytics not available");
+            }
+            
             console.log("Firebase successfully initialized");
             
             // Test connection by reading a value
@@ -388,6 +402,11 @@ function initializeFirebase() {
             console.log("Firebase already initialized");
             firebaseApp = firebase.app();
             firebaseDB = firebase.database();
+            
+            // Get Analytics instance if it exists
+            if (typeof firebase.analytics === 'function') {
+                window.firebaseAnalytics = firebase.analytics();
+            }
         } else {
             console.warn("Firebase SDK not found, using mock Firebase");
             setupMockFirebase();
@@ -994,6 +1013,12 @@ function startGame(isMultiplayer = false) {
     
     // Update Buy Me a Coffee button visibility
     updateBuyMeCoffeeVisibility();
+    
+    // Log game_start event
+    logAnalyticsEvent('game_start', {
+        multiplayer_mode: isMultiplayer,
+        exploration_mode: explorationMode
+    });
 }
 
 function updateTargetStadium() {
@@ -1222,6 +1247,15 @@ function endGame(victory) {
     
     // Update Buy Me a Coffee button visibility
     updateBuyMeCoffeeVisibility();
+    
+    // Log game_end event
+    logAnalyticsEvent('game_end', {
+        victory: victory,
+        score: score,
+        stadiums_found: foundStadiums.length,
+        multiplayer_mode: isMultiplayerMode,
+        game_duration_seconds: 60 - timer
+    });
 }
 
 function resetGame() {
@@ -1405,11 +1439,27 @@ buyMeCoffeeBtn.addEventListener('mouseleave', () => {
     }
 });
 
+// Track clicks on the Buy Me a Coffee button
+buyMeCoffeeBtn.addEventListener('click', () => {
+    logAnalyticsEvent('buy_me_coffee_click', {
+        game_active: gameActive,
+        score: score,
+        stadiums_found: foundStadiums.length,
+        screen: gameActive ? 'gameplay' : (leaderboardModal.style.display === 'block' ? 'leaderboard' : 'home')
+    });
+});
+
 // Modify the startGame function to update Buy Me a Coffee button visibility
 const originalStartGame = startGame;
 startGame = function(isMultiplayer) {
     originalStartGame(isMultiplayer);
     updateBuyMeCoffeeVisibility();
+    
+    // Log game_start event
+    logAnalyticsEvent('game_start', {
+        multiplayer_mode: isMultiplayer,
+        exploration_mode: explorationMode
+    });
 };
 
 // Add Buy Me a Coffee visibility update to the existing endGame function
@@ -1423,16 +1473,37 @@ endGame = function(victory) {
         }
     }
     
+    // Log game_end event
+    logAnalyticsEvent('game_end', {
+        victory: victory,
+        score: score,
+        stadiums_found: foundStadiums.length,
+        multiplayer_mode: isMultiplayerMode,
+        game_duration_seconds: 60 - timer
+    });
+    
     // Show multiplayer results
     if (isMultiplayerMode) {
         let resultText = '';
+        let matchResult = 'tie';
+        
         if (score > opponentScore) {
             resultText = `You win! You beat ${opponentName} by ${score - opponentScore} points.`;
+            matchResult = 'win';
         } else if (score < opponentScore) {
             resultText = `${opponentName} wins by ${opponentScore - score} points!`;
+            matchResult = 'loss';
         } else {
             resultText = `It's a tie! Both players scored ${score} points.`;
         }
+        
+        // Log multiplayer_match_end event
+        logAnalyticsEvent('multiplayer_match_end', {
+            match_result: matchResult,
+            score_difference: Math.abs(score - opponentScore),
+            player_score: score,
+            opponent_score: opponentScore
+        });
         
         // We'll add this to the game-over-modal
         const multiplayerResult = document.createElement('p');
@@ -1685,6 +1756,12 @@ function createMultiplayerGame() {
     isHost = true;
     isMultiplayerMode = true;
     
+    // Log multiplayer_create_game event
+    logAnalyticsEvent('multiplayer_create_game', {
+        game_code: gameRoomId,
+        player_nickname: playerNickname
+    });
+    
     // Display game code and update UI
     gameCodeDisplay.textContent = gameRoomId;
     hostNameDisplay.textContent = playerNickname;
@@ -1767,6 +1844,12 @@ function joinGameRoom() {
     console.log("Attempting to join room:", code);
     joinErrorDisplay.textContent = 'Connecting...';
     
+    // Log multiplayer_join_attempt event
+    logAnalyticsEvent('multiplayer_join_attempt', {
+        game_code: code,
+        player_nickname: playerNickname
+    });
+    
     // Check if room exists
     if (firebaseDB) {
         const roomRef = firebaseDB.ref(`rooms/${code}`);
@@ -1785,6 +1868,12 @@ function joinGameRoom() {
                     const hostName = snapshot.val().hostName;
                     opponentName = hostName;
                     
+                    // Log multiplayer_join_success event
+                    logAnalyticsEvent('multiplayer_join_success', {
+                        game_code: code,
+                        host_name: hostName
+                    });
+                    
                     // Update UI
                     gameCodeDisplay.textContent = gameRoomId;
                     hostNameDisplay.textContent = hostName;
@@ -1799,6 +1888,12 @@ function joinGameRoom() {
                     });
                 } else {
                     // Room doesn't exist or game already started
+                    logAnalyticsEvent('multiplayer_join_failed', {
+                        game_code: code,
+                        reason: snapshot.exists() ? 
+                            (snapshot.val().active ? "Game already started" : "Room not active") : 
+                            "Room not found"
+                    });
                     throw new Error("Game not found or already started");
                 }
             })
@@ -1853,6 +1948,13 @@ function startMultiplayerGame() {
     if (isHost && firebaseDB) {
         const roomRef = firebaseDB.ref(`rooms/${gameRoomId}`);
         roomRef.update({ gameStarted: true });
+        
+        // Log multiplayer_game_started event
+        logAnalyticsEvent('multiplayer_game_started', {
+            game_code: gameRoomId,
+            host_name: playerNickname,
+            guest_name: opponentName
+        });
     }
     
     // Hide multiplayer modal
@@ -1959,10 +2061,34 @@ function resetMultiplayerState() {
     opponentStatusDisplay.classList.add('hidden');
 }
 
-// Modify the existing identifyStadium function to update multiplayer stats
+// Modify the existing identifyStadium function to update multiplayer stats and track analytics
 const originalIdentifyStadium = identifyStadium;
 identifyStadium = function() {
+    // Get the original distance to the stadium before the function runs
+    // to track how close the player was when they found it
+    const distance = targetStadium ? getDistance(
+        playerPosition.lat, playerPosition.lng,
+        targetStadium.lat, targetStadium.lng
+    ) : null;
+    
+    const stadiumNameBefore = targetStadium?.name;
+    const stadiumCountBefore = foundStadiums.length;
+    
+    // Call the original function
     originalIdentifyStadium();
+    
+    // Check if a stadium was found by comparing the counts
+    if (foundStadiums.length > stadiumCountBefore) {
+        // Log stadium_found event
+        logAnalyticsEvent('stadium_found', {
+            stadium_name: stadiumNameBefore,
+            distance_km: distance.toFixed(3),
+            exploration_mode: explorationMode,
+            stadiums_found_count: foundStadiums.length,
+            current_score: score,
+            remaining_time: timer
+        });
+    }
     
     // Update multiplayer stats when a stadium is found
     if (isMultiplayerMode) {
@@ -2113,3 +2239,78 @@ function testAndFixFirebase() {
 
 // Make test function globally available
 window.testAndFixFirebase = testAndFixFirebase;
+
+// Helper function to log Analytics events if available
+function logAnalyticsEvent(eventName, eventParams = {}) {
+    if (window.firebaseAnalytics) {
+        console.log(`Logging analytics event: ${eventName}`, eventParams);
+        window.firebaseAnalytics.logEvent(eventName, eventParams);
+    }
+}
+
+// Function to verify Firebase Analytics is working
+function verifyFirebaseAnalytics() {
+    console.log("=== FIREBASE ANALYTICS TEST ===");
+    
+    // Check if Firebase is loaded
+    if (typeof firebase === 'undefined') {
+        console.error("❌ Firebase SDK not loaded");
+        return "Firebase SDK not loaded. Make sure scripts are properly included.";
+    }
+    
+    // Check if Firebase Analytics is available
+    if (typeof firebase.analytics !== 'function') {
+        console.error("❌ Firebase Analytics not available");
+        return "Firebase Analytics not available. Make sure you've included the analytics library.";
+    }
+    
+    // Check if Firebase App is initialized
+    if (firebase.apps.length === 0) {
+        console.error("❌ Firebase has not been initialized");
+        return "Firebase has not been initialized. Check your configuration.";
+    }
+    
+    // Check if Analytics was initialized
+    if (!window.firebaseAnalytics) {
+        console.warn("⚠️ Firebase Analytics object not found in window");
+        
+        // Try to initialize it now
+        try {
+            window.firebaseAnalytics = firebase.analytics();
+            console.log("✅ Firebase Analytics initialized now");
+        } catch (error) {
+            console.error("❌ Failed to initialize Firebase Analytics:", error);
+            return `Failed to initialize Analytics: ${error.message}`;
+        }
+    } else {
+        console.log("✅ Firebase Analytics object found in window");
+    }
+    
+    // Check measurement ID
+    const measurementId = window.env?.FIREBASE_MEASUREMENT_ID;
+    if (!measurementId) {
+        console.warn("⚠️ Measurement ID not found in environment variables");
+    } else {
+        console.log("✅ Measurement ID found:", measurementId);
+    }
+    
+    // Send a test event
+    try {
+        window.firebaseAnalytics.logEvent('analytics_test', { 
+            test_time: new Date().toISOString(),
+            browser: navigator.userAgent
+        });
+        console.log("✅ Test event sent to Firebase Analytics");
+    } catch (error) {
+        console.error("❌ Failed to send test event:", error);
+        return `Failed to send test event: ${error.message}`;
+    }
+    
+    console.log("Remember: Analytics data may take up to 24 hours to appear in the Firebase console");
+    console.log("=== TEST COMPLETE ===");
+    
+    return "Analytics test complete. Check console for details.";
+}
+
+// Make the verify function globally available
+window.verifyFirebaseAnalytics = verifyFirebaseAnalytics;
